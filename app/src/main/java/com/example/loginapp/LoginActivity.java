@@ -1,8 +1,10 @@
 package com.example.loginapp;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -12,6 +14,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -20,7 +24,7 @@ import com.google.firebase.auth.FirebaseUser;
 public class LoginActivity extends AppCompatActivity {
     EditText emailId, password;
     Button signIn;
-    TextView signUp;
+    TextView signUp, forgotPassword;
     FirebaseAuth firebaseAuthenticator;
     private FirebaseAuth.AuthStateListener fireBaseAuthStateListener;
 
@@ -34,6 +38,7 @@ public class LoginActivity extends AppCompatActivity {
         password = findViewById(R.id.editTextTextPassword);
         signIn = findViewById(R.id.button);
         signUp = findViewById(R.id.textView);
+        forgotPassword = findViewById(R.id.textView4);
 
         fireBaseAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -77,7 +82,6 @@ public class LoginActivity extends AppCompatActivity {
                     } else {
                         Toast.makeText(LoginActivity.this, "Error occurred", Toast.LENGTH_SHORT).show();
                     }
-
             }
         });
 
@@ -94,5 +98,43 @@ public class LoginActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         firebaseAuthenticator.addAuthStateListener(fireBaseAuthStateListener);
+
+        forgotPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText resetPassword = new EditText(v.getContext());
+                AlertDialog.Builder passwordReset = new AlertDialog.Builder(v.getContext());
+                passwordReset.setTitle("Reset Password");
+                passwordReset.setTitle("Enter your email address to reset your password");
+                passwordReset.setView(resetPassword);
+
+                passwordReset.setPositiveButton("Y", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String mail = resetPassword.getText().toString();
+                        firebaseAuthenticator.sendPasswordResetEmail(mail).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Toast.makeText(LoginActivity.this, "Reset link sent to your given email", Toast.LENGTH_SHORT).show();
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(LoginActivity.this, "Error sending link" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                });
+
+                passwordReset.setNegativeButton("N", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+
+                passwordReset.create().show();
+            }
+        });
     }
 }
+
