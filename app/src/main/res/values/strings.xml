@@ -12,5 +12,6 @@
     <string name="logout">Logout</string>
     <string name="phone">Phone</string>
     <string name="not_registered_sign_up_here">Not registered? Sign Up here</string>
+    <string name="forgot_password_click_here">Forgot Password? Click here</string>
     />
 </resources>
