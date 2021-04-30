@@ -13,5 +13,8 @@
     <string name="phone">Phone</string>
     <string name="not_registered_sign_up_here">Not registered? Sign Up here</string>
     <string name="forgot_password_click_here">Forgot Password? Click here</string>
+    <string name="already_registered_sign_in">Already registered? Sign in</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="already_registered">Already Registered?</string>
     />
 </resources>
