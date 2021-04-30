@@ -1,13 +1,16 @@
 package com.example.loginapp;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.firebase.auth.FirebaseAuth;
+
+import static com.example.loginapp.LoginActivity.isLoggedIn;
+import static com.example.loginapp.LoginActivity.SHARED_PREFS;
 
 public class HomeActivity extends AppCompatActivity {
     Button logOutButton;
@@ -18,16 +21,17 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
         logOutButton = findViewById(R.id.button2);
 
-        logOutButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FirebaseAuth.getInstance().signOut();
-                Intent backToLogIn = new Intent(HomeActivity.this, LoginActivity.class);
-                startActivity(backToLogIn);
-            }
+        logOutButton.setOnClickListener(v -> {
+            FirebaseAuth.getInstance().signOut();
+            SharedPreferences mySharedPref = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
+            SharedPreferences.Editor editor = mySharedPref.edit();
+            editor.putBoolean(LoginActivity.isLoggedIn,false);
+            editor.apply();
+            Intent toLogInPage = new Intent(HomeActivity.this, LoginActivity.class);
+            startActivity(toLogInPage);
+            finish();
         });
     }
 }
