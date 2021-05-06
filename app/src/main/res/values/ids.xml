@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="help" type="id" />
+    <item name="delete" type="id" />
+    <item name="logout" type="id" />
+    <item name="navigateRemainder" type="id" />
+    <item name="navigateArchive" type="id" />
+    <item name="navigateNotes" type="id" />
+    <item name="nav_view" type="id" />
+    <item name="addNotesFloatingButton" type="id" />
+    <item name="noteDescription" type="id" />
+    <item name="noteTitle" type="id" />
+    <item name="saveNoteProgressBar" type="id" />
+    <item name="saveNote" type="id" />
+</resources>

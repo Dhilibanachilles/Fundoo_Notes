@@ -8,13 +8,22 @@
     <string name="textview">TextView</string>
     <string name="welcome_you_are_logged_in">Welcome! you are logged in</string>
     <string name="name">Full Name</string>
-    <string name="fundoo_notes">Fundoo Notes</string>
     <string name="logout">Logout</string>
     <string name="phone">Phone</string>
     <string name="not_registered_sign_up_here">Not registered? Sign Up here</string>
     <string name="forgot_password_click_here">Forgot Password? Click here</string>
     <string name="already_registered_sign_in">Already registered? Sign in</string>
     <string name="forgot_password">Forgot Password?</string>
-    <string name="already_registered">Already Registered?</string>
+    <string name="already_registered">Already Registered? Sign in</string>
+    <string name="profile">TODO</string>
+    <string name="fundoo_notes">Fundoo Notes</string>
+    <string name="archive">Archive</string>
+    <string name="navigation_drawer_close" />
+    <string name="navigation_drawer_open" />
+    <string name="remainder">Remainder</string>
+    <string name="notes">Notes</string>
+    <string name="todo">TODO</string>
+    <string name="floatingbutton">floatingButton</string>
+    <string name="description">Description</string>
     />
 </resources>
