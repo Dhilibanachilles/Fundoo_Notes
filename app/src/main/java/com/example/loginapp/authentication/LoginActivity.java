@@ -1,7 +1,6 @@
-package com.example.loginapp;
+package com.example.loginapp.authentication;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -13,6 +12,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.loginapp.R;
+import com.example.loginapp.SharedPreference;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -22,8 +23,13 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+
+import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
     private EditText emailId, password;
@@ -36,6 +42,7 @@ public class LoginActivity extends AppCompatActivity {
     public static final String SHARED_PREFS = "sharedPrefs";
     public static final String isLoggedIn = "Logged_In";
     GoogleSignInClient mGoogleSignInClient;
+    SharedPreference sharedPreference;
 
 
     @Override
@@ -44,7 +51,7 @@ public class LoginActivity extends AppCompatActivity {
 
         FirebaseUser user = firebaseAuthenticator.getCurrentUser();
         if(user!=null){
-            Intent intent = new Intent(getApplicationContext(),HomeActivity.class);
+            Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
             startActivity(intent);
             finish();
         }
@@ -68,6 +75,7 @@ public class LoginActivity extends AppCompatActivity {
         signUp = findViewById(R.id.textView);
         forgotPassword = findViewById(R.id.textView4);
         googleSignIn = findViewById(R.id.googleSignInButton);
+        sharedPreference = new SharedPreference(this);
     }
 
     private void setUpOnClickListeners() {
@@ -170,20 +178,29 @@ public class LoginActivity extends AppCompatActivity {
             } else if (!(email.isEmpty() && pasword.isEmpty())) {
                 firebaseAuthenticator.signInWithEmailAndPassword(email, pasword).addOnCompleteListener(LoginActivity.this, task -> {
                     if (!task.isSuccessful()) {
-                        Toast.makeText(LoginActivity.this, "Login Error, Please try again", Toast.LENGTH_SHORT).show();
+                        try {
+                            throw Objects.requireNonNull(task.getException());
+                        } catch (FirebaseAuthInvalidCredentialsException e) {
+                            password.setError("Password is Wrong");
+                            password.requestFocus();
+                        } catch (FirebaseAuthUserCollisionException e) {
+                            emailId.setError("Email Address is already Active in Another Device");
+                            emailId.requestFocus();
+                        } catch (FirebaseAuthInvalidUserException e) {
+                            emailId.setError("Email Address is Not Registered");
+                            emailId.requestFocus();
+                        } catch (Exception e) {
+                            Log.e(LogInActivity, e.getMessage());
+                        }
                     } else {
-                        SharedPreferences mySharedPref = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
-                        SharedPreferences.Editor editor = mySharedPref.edit();
-                        editor.putBoolean(isLoggedIn, true);
-                        editor.apply();
+                        sharedPreference.setLoggedIn(true);
                         finish();
-                        Intent toHome = new Intent(LoginActivity.this, HomeActivity.class);
-                        startActivity(toHome);
+                        Intent toHomePage = new Intent(LoginActivity.this,HomeActivity.class);
+                        startActivity(toHomePage);
                     }
                 });
             } else {
                 Toast.makeText(LoginActivity.this, "Error Occurred While logging in", Toast.LENGTH_SHORT).show();
-
             }
         }
     }

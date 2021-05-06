@@ -1,4 +1,4 @@
-package com.example.loginapp;
+package com.example.loginapp.authentication;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.loginapp.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
