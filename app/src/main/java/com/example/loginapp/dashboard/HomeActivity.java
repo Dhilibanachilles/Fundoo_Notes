@@ -1,4 +1,4 @@
-package com.example.loginapp.authentication;
+package com.example.loginapp.dashboard;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -15,6 +15,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.loginapp.R;
 import com.example.loginapp.SharedPreference;
+import com.example.loginapp.authentication.LoginActivity;
 import com.example.loginapp.fragments.FragmentArchive;
 import com.example.loginapp.fragments.FragmentNotes;
 import com.example.loginapp.fragments.FragmentRemainder;
