@@ -12,4 +12,8 @@
     <item name="noteTitle" type="id" />
     <item name="saveNoteProgressBar" type="id" />
     <item name="saveNote" type="id" />
+    <item name="edittitleofnote" type="id" />
+    <item name="editcontentofnote" type="id" />
+    <item name="saveeditnote" type="id" />
+    <item name="toolbarofeditnote" type="id" />
 </resources>

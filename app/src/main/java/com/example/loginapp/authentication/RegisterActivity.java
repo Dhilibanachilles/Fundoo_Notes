@@ -7,21 +7,24 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.loginapp.R;
-import com.example.loginapp.dashboard.HomeActivity;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
     private EditText emailId, password, name, phone;
     private Button signUp;
     private TextView signIn;
     private FirebaseAuth firebaseAuthenticator;
+    FirebaseFirestore firebaseFirestore;
+    FirebaseUser firebaseUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +44,7 @@ public class RegisterActivity extends AppCompatActivity {
         signUp = findViewById(R.id.button);
         signIn = findViewById(R.id.textView);
         phone = findViewById(R.id.editTextPhone);
+        firebaseFirestore = FirebaseFirestore.getInstance();
     }
 
     private void setUpClickListeners() {
@@ -124,14 +128,21 @@ public class RegisterActivity extends AppCompatActivity {
             } else if(!isValidPhoneNumber(phoneNumber)) {
                 return;
             } else if (!(email.isEmpty() && pasword.isEmpty() && userName.isEmpty() && phoneNumber.isEmpty())) {
-                firebaseAuthenticator.createUserWithEmailAndPassword(email, pasword).addOnCompleteListener(RegisterActivity.this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (!task.isSuccessful()) {
-                            Toast.makeText(RegisterActivity.this, "SignUp unsuccessful, Please try again", Toast.LENGTH_SHORT).show();
-                        } else {
-                            startActivity(new Intent(RegisterActivity.this, HomeActivity.class));
-                        }
+                firebaseAuthenticator.createUserWithEmailAndPassword(email, pasword).addOnCompleteListener(RegisterActivity.this, task -> {
+                    if (!task.isSuccessful()) {
+                        Toast.makeText(RegisterActivity.this, "SignUp unsuccessful, Please try again", Toast.LENGTH_SHORT).show();
+                    }   else {
+                        DocumentReference documentReference = firebaseFirestore.collection("Users")
+                                .document(firebaseUser.getUid()).collection("User Notes").document();
+                        Map<String, Object> user = new HashMap<>();
+                        user.put("UserName", name);
+                        user.put("Email", email);
+                        documentReference.set(user).addOnSuccessListener(aVoid -> Toast.
+                                makeText(getApplicationContext(),
+                                        "User information added Successfully", Toast.LENGTH_SHORT).show()).
+                                addOnFailureListener(e -> Toast.makeText(getApplicationContext(),
+                                        "Failed To add User information", Toast.LENGTH_SHORT).show());
+                        startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
                     }
                 });
             } else {

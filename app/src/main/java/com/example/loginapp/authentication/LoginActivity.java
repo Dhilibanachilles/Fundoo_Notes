@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -29,7 +30,10 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
@@ -37,19 +41,20 @@ public class LoginActivity extends AppCompatActivity {
     private Button signIn;
     private SignInButton googleSignIn;
     TextView signUp, forgotPassword;
-    private final String LogInActivity = "LoginActivity";
+    private final String loginActivityTag = "LoginActivity";
     private final int RC_SIGN_IN = 1;
     FirebaseAuth firebaseAuthenticator;
     public static final String SHARED_PREFS = "sharedPrefs";
     public static final String isLoggedIn = "Logged_In";
     GoogleSignInClient mGoogleSignInClient;
     SharedPreference sharedPreference;
-
+    FirebaseFirestore firebaseFirestore;
+    FirebaseUser firebaseUser;
 
     @Override
     protected void onStart() {
         super.onStart();
-        getSupportActionBar().hide();
+        Objects.requireNonNull(getSupportActionBar()).hide();
 
         FirebaseUser user = firebaseAuthenticator.getCurrentUser();
         if(user!=null){
@@ -63,6 +68,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         findViews();
         setUpOnClickListeners();
@@ -78,6 +84,8 @@ public class LoginActivity extends AppCompatActivity {
         forgotPassword = findViewById(R.id.textView4);
         googleSignIn = findViewById(R.id.googleSignInButton);
         sharedPreference = new SharedPreference(this);
+        firebaseFirestore = FirebaseFirestore.getInstance();
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
     }
 
     private void setUpOnClickListeners() {
@@ -121,30 +129,53 @@ public class LoginActivity extends AppCompatActivity {
                 // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 assert account != null;
-                Log.d(LogInActivity, "firebaseAuthWithGoogle:" + account.getId());
+                Log.d(loginActivityTag, "firebaseAuthWithGoogle:" + account.getId());
                 firebaseAuthWithGoogle(account.getIdToken());
             } catch (ApiException e) {
                 // Google Sign In failed, update UI appropriately
-                Log.w(LogInActivity, "Google sign in failed", e);
+                Log.w(loginActivityTag, "Google sign in failed", e);
             }
         }
     }
 
     private void firebaseAuthWithGoogle(String idToken) {
+
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
-        firebaseAuthenticator.signInWithCredential(credential).addOnCompleteListener(LoginActivity.this, task -> {
-            if (task.isSuccessful()) {
-                // Sign in success,
-                Log.d(LogInActivity, "signInWithCredential:success");
-                firebaseAuthenticator.getCurrentUser();
-                Intent toHomePage = new Intent(LoginActivity.this, HomeActivity.class);
-                startActivity(toHomePage);
-                finish();
-            } else {
-                // If sign in fails, display a message to the user.
-                Log.w(LogInActivity, "signInWithCredential:failure", task.getException());
-            }
-        });
+        firebaseAuthenticator.signInWithCredential(credential)
+                .addOnCompleteListener(this, task -> {
+
+                    if (task.isSuccessful()) {
+                        if (task.getResult().getAdditionalUserInfo().isNewUser()){
+                            String userName = firebaseUser.getDisplayName();
+                            String email = firebaseUser.getEmail();
+                            Map<String, Object> user = new HashMap<>();
+                            user.put("UserName", userName);
+                            user.put("Email", email);
+                            firebaseFirestore.collection("Users").document(firebaseUser.getUid()).set(user);
+                        }
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d(loginActivityTag, "signInWithCredential:success");
+                        FirebaseUser user = firebaseAuthenticator.getCurrentUser();
+                        Intent intent = new Intent(LoginActivity.this,HomeActivity.class);
+                        startActivity(intent);
+                        finish();
+                        updateUI(user);
+                    } else {
+                        // If sign in fails, display a message to the user.
+                        Log.w(loginActivityTag, "signInWithCredential:failure", task.getException());
+                        updateUI(null);
+                    }
+                });
+    }
+
+    private void updateUI(FirebaseUser user) {
+
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(getApplicationContext());
+        if(account !=  null){
+            String personName = account.getDisplayName();
+            String personEmail = account.getEmail();
+            Toast.makeText(LoginActivity.this,personName + personEmail ,Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void setForgotPassword() {
@@ -192,7 +223,7 @@ public class LoginActivity extends AppCompatActivity {
                             emailId.setError("Email Address is Not Registered");
                             emailId.requestFocus();
                         } catch (Exception e) {
-                            Log.e(LogInActivity, e.getMessage());
+                            Log.e(loginActivityTag, e.getMessage());
                         }
                     } else {
                         sharedPreference.setLoggedIn(true);

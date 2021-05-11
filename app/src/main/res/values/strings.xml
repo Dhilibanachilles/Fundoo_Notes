@@ -26,5 +26,8 @@
     <string name="floatingbutton">floatingButton</string>
     <string name="description">Description</string>
     <string name="title">Title</string>
+    <string name="shows_title">Shows Title</string>
+    <string name="shows_description">Shows Description</string>
+
     />
 </resources>
