@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/fundoo2"
-    tools:context=".LoginActivity">
+    tools:context=".authentication.LoginActivity">
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/googleSignInButton"

@@ -58,8 +58,8 @@ public class AddingNotesFragment extends Fragment {
                 DocumentReference documentReference = firebaseFirestore.collection("Users")
                         .document(firebaseUser.getUid()).collection("User Notes").document();
                 Map<String, Object> note = new HashMap<>();
-                note.put("title", title);
-                note.put("description", description);
+                note.put("1.Title", title);
+                note.put("2.Description", description);
 
                 createNoteProgressBar.setVisibility(View.VISIBLE);
                 documentReference.set(note).addOnSuccessListener(aVoid -> Toast.makeText(getContext(),

@@ -10,17 +10,21 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.LoginApp">
-        <activity android:name=".SplashActivity" >
+        android:theme="@style/AppTheme.LoginApp">
+        <activity android:name=".userInterface.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".HomeActivity" />
-        <activity android:name=".RegisterActivity">
+        <activity android:name=".authentication.LoginActivity" />
+        <activity
+            android:name=".dashboard.HomeActivity"
+            android:windowSoftInputMode="adjustNothing"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity android:name=".authentication.RegisterActivity">
         </activity>
     </application>
 

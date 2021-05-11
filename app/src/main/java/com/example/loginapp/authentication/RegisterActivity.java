@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.loginapp.R;
+import com.example.loginapp.dashboard.HomeActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -25,6 +26,7 @@ public class RegisterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSupportActionBar().hide();
         setContentView(R.layout.activity_main);
 
        findViews();
@@ -98,7 +100,7 @@ public class RegisterActivity extends AppCompatActivity {
             phone.setError("Please enter phone number");
             phone.requestFocus();
             return false;
-        } else if(!phoneNumber.matches("(([1-9]{2})?)[ ][0-9]{10}")) {
+        } else if(!phoneNumber.matches("[0-9]{10}")) {
             phone.setError("Please enter valid phone number");
             phone.requestFocus();
             return false;

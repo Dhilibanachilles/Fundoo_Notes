@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">LoginApp</string>
+    <string name="app_name">FundooNote</string>
     <string name="password">Password</string>
     <string name="already_have_an_account_sign_in_here">Already have an account? Sign in here</string>
     <string name="sign_up">Sign Up</string>
@@ -25,5 +25,6 @@
     <string name="todo">TODO</string>
     <string name="floatingbutton">floatingButton</string>
     <string name="description">Description</string>
+    <string name="title">Title</string>
     />
 </resources>

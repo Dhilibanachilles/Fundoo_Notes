@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.loginapp.R;
 import com.example.loginapp.SharedPreference;
-import com.example.loginapp.authentication.HomeActivity;
+import com.example.loginapp.dashboard.HomeActivity;
 import com.example.loginapp.authentication.LoginActivity;
 
 
@@ -22,6 +22,7 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSupportActionBar().hide();
         setContentView(R.layout.activity_splash);
         sharedPreference = new SharedPreference(this);
 

@@ -25,11 +25,13 @@ public class FragmentNotes extends Fragment {
     }
 
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-
         super.onActivityCreated(savedInstanceState);
+        setUpOnClickListeners();
+    }
 
-        FloatingActionButton addnote = Objects.requireNonNull(getView()).findViewById(R.id.addNotesFloatingButton);
-        addnote.setOnClickListener(v -> {
+    private void setUpOnClickListeners() {
+        FloatingActionButton onClickingAddNoteButton = Objects.requireNonNull(getView()).findViewById(R.id.addNotesFloatingButton);
+        onClickingAddNoteButton.setOnClickListener(v -> {
             Fragment fragment = new AddingNotesFragment();
             FragmentManager fragmentManager = Objects.requireNonNull(getActivity()).getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
