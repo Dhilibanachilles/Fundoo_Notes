@@ -11,11 +11,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.example.loginapp.FirebaseNoteManager;
-import com.example.loginapp.Note;
+import com.example.loginapp.FirebaseNoteModel;
 import com.example.loginapp.NoteAdapter;
 import com.example.loginapp.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -27,8 +27,8 @@ public class FragmentNotes extends Fragment {
 
     RecyclerView recyclerView;
     FirebaseNoteManager firebaseNoteManager;
-
-    private final ArrayList<Note> notes = new ArrayList<Note>();
+    private static final String TAG = "FragmentNotes";
+    private final ArrayList<FirebaseNoteModel> firebaseNoteModels = new ArrayList<FirebaseNoteModel>();
     private NoteAdapter notesAdapter;
 
     @Nullable
@@ -36,23 +36,21 @@ public class FragmentNotes extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_notes, container, false);
-
-        final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
-        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        final StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(2,
+              StaggeredGridLayoutManager.VERTICAL);
         recyclerView = view.findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setLayoutManager(staggeredGridLayoutManager);
         recyclerView.setHasFixedSize(true);
         firebaseNoteManager = new FirebaseNoteManager();
-
-        return inflater.inflate(R.layout.fragment_notes, container, false);
+        return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         firebaseNoteManager.getAllNotes(notesList -> {
-            Log.e("Dhiliban", "onNoteReceived: " + notesList);
-            notesAdapter = new NoteAdapter(notesList,this.getContext());
+            Log.e(TAG, "onNoteReceived: " + notesList);
+            notesAdapter = new NoteAdapter(notesList);
             recyclerView.setAdapter(notesAdapter);
             notesAdapter.notifyDataSetChanged();
         });

@@ -21,7 +21,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class note_details extends Fragment {
 
-
     private TextView mtitleofnotedetail,mcontentofnotedetail;
     FloatingActionButton mgotoeditnote;
     HomeActivity homeActivity;
