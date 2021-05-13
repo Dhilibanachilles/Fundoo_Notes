@@ -1,4 +1,4 @@
-package com.example.loginapp;
+package com.example.loginapp.data_manager.model;
 
 public class FirebaseNoteModel {
 

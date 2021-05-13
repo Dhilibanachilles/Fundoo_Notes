@@ -3,7 +3,10 @@ package com.example.loginapp.dashboard;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -13,11 +16,14 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.example.loginapp.util.CallBack;
+import com.example.loginapp.data_manager.FirebaseUserManager;
+import com.example.loginapp.data_manager.model.FirebaseUserModel;
 import com.example.loginapp.R;
-import com.example.loginapp.SharedPreference;
+import com.example.loginapp.data_manager.SharedPreferenceHelper;
 import com.example.loginapp.authentication.LoginActivity;
 import com.example.loginapp.fragments.FragmentArchive;
-import com.example.loginapp.fragments.FragmentNotes;
+import com.example.loginapp.fragments.notes.FragmentNotes;
 import com.example.loginapp.fragments.FragmentRemainder;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -28,7 +34,9 @@ public class HomeActivity extends AppCompatActivity {
     FirebaseAuth firebaseAuthenticator;
     private FirebaseAuth.AuthStateListener firebaseAuthStateListener;
     private DrawerLayout drawer;
-    SharedPreference sharedPreference;
+    SharedPreferenceHelper sharedPreferenceHelper;
+    private final FirebaseUserManager firebaseUserManager = new FirebaseUserManager();
+    private static final String TAG = "HomeActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +44,7 @@ public class HomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        sharedPreference = new SharedPreference(this);
+        sharedPreferenceHelper = new SharedPreferenceHelper(this);
         drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.design_navigation_view);
         navigationView.setNavigationItemSelectedListener(this::onNavigationItemSelected);
@@ -46,9 +54,25 @@ public class HomeActivity extends AppCompatActivity {
         toggle.syncState();
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                    new FragmentNotes()).commit();
+            new FragmentNotes()).commit();
             navigationView.setCheckedItem(navigateNotes);
         }
+
+        View headerView = navigationView.getHeaderView(0);
+        TextView userEmail = headerView.findViewById(R.id.user_email);
+        firebaseUserManager.getUserDetails(new CallBack<FirebaseUserModel>() {
+            @Override
+            public void onSuccess(FirebaseUserModel data) {
+                Toast.makeText(HomeActivity.this, "Logged in", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "onSuccess: " );
+                userEmail.setText(data.getUserEmail());
+            }
+
+            @Override
+            public void onFailure(Exception exception) {
+                Toast.makeText(HomeActivity.this, "Something went Wrong", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -76,7 +100,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private void logout() {
         FirebaseAuth.getInstance().signOut();
-        sharedPreference.setLoggedIn(false);
+        sharedPreferenceHelper.setLoggedIn(false);
         finish();
         Intent intToMain = new Intent(HomeActivity.this, LoginActivity.class);
         startActivity(intToMain);

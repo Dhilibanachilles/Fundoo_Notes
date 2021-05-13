@@ -16,7 +16,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.appcompat.widget.Toolbar;
 import com.example.loginapp.dashboard.HomeActivity;
-import com.example.loginapp.fragments.FragmentNotes;
+import com.example.loginapp.fragments.notes.FragmentNotes;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;

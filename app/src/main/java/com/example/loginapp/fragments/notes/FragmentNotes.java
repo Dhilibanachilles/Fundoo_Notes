@@ -1,23 +1,28 @@
-package com.example.loginapp.fragments;
+package com.example.loginapp.fragments.notes;
 
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
-import com.example.loginapp.FirebaseNoteManager;
-import com.example.loginapp.FirebaseNoteModel;
-import com.example.loginapp.NoteAdapter;
 import com.example.loginapp.R;
+import com.example.loginapp.adapters.NoteAdapter;
+import com.example.loginapp.data_manager.FirebaseNoteManager;
+import com.example.loginapp.data_manager.model.FirebaseNoteModel;
+import com.example.loginapp.fragments.AddingNotesFragment;
+import com.example.loginapp.util.ViewState;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -30,11 +35,11 @@ public class FragmentNotes extends Fragment {
     private static final String TAG = "FragmentNotes";
     private final ArrayList<FirebaseNoteModel> firebaseNoteModels = new ArrayList<FirebaseNoteModel>();
     private NoteAdapter notesAdapter;
+    private NotesViewModel notesViewModel;
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_notes, container, false);
         final StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(2,
               StaggeredGridLayoutManager.VERTICAL);
@@ -42,18 +47,43 @@ public class FragmentNotes extends Fragment {
         recyclerView.setLayoutManager(staggeredGridLayoutManager);
         recyclerView.setHasFixedSize(true);
         firebaseNoteManager = new FirebaseNoteManager();
+        notesViewModel = new ViewModelProvider(this).get(NotesViewModel.class);
         return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        firebaseNoteManager.getAllNotes(notesList -> {
-            Log.e(TAG, "onNoteReceived: " + notesList);
-            notesAdapter = new NoteAdapter(notesList);
-            recyclerView.setAdapter(notesAdapter);
-            notesAdapter.notifyDataSetChanged();
+        notesViewModel.notesMutableLiveData.observe(getViewLifecycleOwner(), new Observer<ViewState<ArrayList<FirebaseNoteModel>>>() {
+            @Override
+            public void onChanged(ViewState<ArrayList<FirebaseNoteModel>> arrayListViewState) {
+                if(arrayListViewState instanceof ViewState.Loading) {
+                    Toast.makeText(getContext(), "Loading", Toast.LENGTH_SHORT).show();
+                } else if (arrayListViewState instanceof ViewState.Success) {
+                    ArrayList<FirebaseNoteModel> notes = ((ViewState.Success<ArrayList<FirebaseNoteModel>>) arrayListViewState).getData();
+                    Log.e(TAG, "onNoteReceived: " + notes);
+                    notesAdapter = new NoteAdapter(notes);
+                    recyclerView.setAdapter(notesAdapter);
+                    notesAdapter.notifyDataSetChanged();
+                } else {
+                    Toast.makeText(getContext(), "Something went Wrong", Toast.LENGTH_SHORT).show();
+                }
+            }
         });
+//        firebaseNoteManager.getAllNotes(new CallBack<ArrayList<FirebaseNoteModel>>() {
+//            @Override
+//            public void onSuccess(ArrayList<FirebaseNoteModel> data) {
+//                Log.e(TAG, "onNoteReceived: " + data);
+//                notesAdapter = new NoteAdapter(data);
+//                recyclerView.setAdapter(notesAdapter);
+//                notesAdapter.notifyDataSetChanged();
+//            }
+//
+//            @Override
+//            public void onFailure(Exception exception) {
+//                Toast.makeText(getContext(), "Something went Wrong", Toast.LENGTH_SHORT).show();
+//            }
+//        });
     }
 
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {

@@ -1,15 +1,15 @@
-package com.example.loginapp;
+package com.example.loginapp.data_manager;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 
-public class SharedPreference  {
+public class SharedPreferenceHelper {
     public static final String SHARED_PREFS = "sharedPrefs";
     public static final String isLoggedIn = "Logged_In";
     SharedPreferences sharedPreference;
     SharedPreferences.Editor editor;
 
-    public SharedPreference(Context context) {
+    public SharedPreferenceHelper(Context context) {
         sharedPreference = context.getSharedPreferences(SHARED_PREFS,Context.MODE_PRIVATE);
     }
 

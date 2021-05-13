@@ -28,6 +28,10 @@
     <string name="title">Title</string>
     <string name="shows_title">Shows Title</string>
     <string name="shows_description">Shows Description</string>
+    <string name="user_email">User Email</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="help_and_feedback">Help and Feedback</string>
 
     />
 </resources>

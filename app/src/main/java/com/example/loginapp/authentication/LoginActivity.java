@@ -14,7 +14,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.loginapp.R;
-import com.example.loginapp.SharedPreference;
+import com.example.loginapp.data_manager.SharedPreferenceHelper;
 import com.example.loginapp.dashboard.HomeActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -47,7 +47,7 @@ public class LoginActivity extends AppCompatActivity {
     public static final String SHARED_PREFS = "sharedPrefs";
     public static final String isLoggedIn = "Logged_In";
     GoogleSignInClient mGoogleSignInClient;
-    SharedPreference sharedPreference;
+    SharedPreferenceHelper sharedPreferenceHelper;
     FirebaseFirestore firebaseFirestore;
     FirebaseUser firebaseUser;
 
@@ -83,7 +83,7 @@ public class LoginActivity extends AppCompatActivity {
         signUp = findViewById(R.id.textView);
         forgotPassword = findViewById(R.id.textView4);
         googleSignIn = findViewById(R.id.googleSignInButton);
-        sharedPreference = new SharedPreference(this);
+        sharedPreferenceHelper = new SharedPreferenceHelper(this);
         firebaseFirestore = FirebaseFirestore.getInstance();
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
     }
@@ -226,7 +226,7 @@ public class LoginActivity extends AppCompatActivity {
                             Log.e(loginActivityTag, e.getMessage());
                         }
                     } else {
-                        sharedPreference.setLoggedIn(true);
+                        sharedPreferenceHelper.setLoggedIn(true);
                         finish();
                         Intent toHomePage = new Intent(LoginActivity.this,HomeActivity.class);
                         startActivity(toHomePage);

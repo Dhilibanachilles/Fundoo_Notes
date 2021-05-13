@@ -7,14 +7,19 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import com.example.loginapp.util.CallBack;
+import com.example.loginapp.data_manager.FirebaseNoteManager;
 import com.example.loginapp.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -49,25 +54,30 @@ public class AddingNotesFragment extends Fragment {
         String description = createNoteDescription.getText().toString();
         String email = firebaseUser.getEmail();
         if (title.isEmpty() || description.isEmpty()) {
-            Toast.makeText(getContext(), "Atleast one field must be filled", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "All fields must be filled", Toast.LENGTH_SHORT).show();
         } else {
             String currentUID = firebaseUser.getUid();
             DocumentReference exist = firebaseFirestore.collection("Users").document(firebaseUser.getUid());
+            createNoteProgressBar.setVisibility(View.VISIBLE);
             if (currentUID.equals(exist.toString())) {
-                createNoteProgressBar.setVisibility(View.VISIBLE);
-                DocumentReference documentReference = firebaseFirestore.collection("Users")
-                        .document(firebaseUser.getUid()).collection("User Notes").document();
-                Map<String, Object> note = new HashMap<>();
-                note.put("Title", title);
-                note.put("Description", description);
+                FirebaseNoteManager firebaseNoteManager = new FirebaseNoteManager();
+                firebaseNoteManager.addNote(title, description, new CallBack<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean data) {
+                        Toast.makeText(getContext(),
+                                "Note Created Successfully",
+                                Toast.LENGTH_SHORT).show();
+                        assert getFragmentManager() != null;
+                        getFragmentManager().popBackStackImmediate();
+                    }
 
-                createNoteProgressBar.setVisibility(View.VISIBLE);
-                documentReference.set(note).addOnSuccessListener(aVoid -> Toast.makeText(getContext(),
-                        "Note Created and Saved Successfully", Toast.LENGTH_SHORT).show()).
-                        addOnFailureListener(e -> Toast.makeText(getContext(), "Note creation failed", Toast.LENGTH_SHORT).show());
-                createNoteProgressBar.setVisibility(View.INVISIBLE);
+                    @Override
+                    public void onFailure(Exception exception) {
+                        Toast.makeText(getContext(),
+                                "Failed To Create Note", Toast.LENGTH_SHORT).show();
+                    }
+                });
             } else {
-                createNoteProgressBar.setVisibility(View.VISIBLE);
                 Map<String, Object> noteGettingUserDetails = new HashMap<>();
                 noteGettingUserDetails.put("Email", email);
                 DocumentReference documentReference;
@@ -76,13 +86,19 @@ public class AddingNotesFragment extends Fragment {
                 Map<String, Object> note = new HashMap<>();
                 note.put("Title", title);
                 note.put("Description", description);
-                firebaseFirestore.collection("Users").document(firebaseUser.getUid()).set(noteGettingUserDetails);
+                firebaseFirestore.collection("Users").document(firebaseUser.getUid())
+                        .set(noteGettingUserDetails);
                 createNoteProgressBar.setVisibility(View.VISIBLE);
-                documentReference.set(note).addOnSuccessListener(aVoid -> Toast.makeText(getContext(),
-                        "Note Created and Saved Successfully", Toast.LENGTH_SHORT).show()).
-                        addOnFailureListener(e -> Toast.makeText(getContext(), "Note creation failed", Toast.LENGTH_SHORT).show());
-                createNoteProgressBar.setVisibility(View.INVISIBLE);
+                documentReference.set(note).addOnSuccessListener(aVoid -> {
+                    Toast.makeText(getContext(),
+                            "Note Created and Saved Successfully", Toast.LENGTH_SHORT).show();
+                    assert getFragmentManager() != null;
+                    getFragmentManager().popBackStackImmediate();
+                }).
+                        addOnFailureListener(e -> Toast.makeText(getContext(),
+                        "Note creation failed", Toast.LENGTH_SHORT).show());
             }
+            createNoteProgressBar.setVisibility(View.VISIBLE);
         }
     }
 }

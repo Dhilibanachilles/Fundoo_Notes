@@ -9,7 +9,7 @@ import android.view.WindowManager;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.loginapp.R;
-import com.example.loginapp.SharedPreference;
+import com.example.loginapp.data_manager.SharedPreferenceHelper;
 import com.example.loginapp.dashboard.HomeActivity;
 import com.example.loginapp.authentication.LoginActivity;
 
@@ -17,21 +17,21 @@ import com.example.loginapp.authentication.LoginActivity;
 public class SplashActivity extends AppCompatActivity {
 
     private boolean isLoggedIn;
-    SharedPreference sharedPreference;
+    SharedPreferenceHelper sharedPreferenceHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getSupportActionBar().hide();
         setContentView(R.layout.activity_splash);
-        sharedPreference = new SharedPreference(this);
+        sharedPreferenceHelper = new SharedPreferenceHelper(this);
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams
                 .FLAG_FULLSCREEN);
 
         new Handler().postDelayed(() -> {
 
-            isLoggedIn = sharedPreference.getLoggedIn();
+            isLoggedIn = sharedPreferenceHelper.getLoggedIn();
             Intent SplashAct;
             if(isLoggedIn) {
                 SplashAct = new Intent(SplashActivity.this, HomeActivity.class);

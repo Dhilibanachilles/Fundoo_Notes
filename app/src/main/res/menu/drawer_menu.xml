@@ -5,27 +5,27 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:title="Notes"
+            android:title="@string/notes"
             android:id="@+id/navigateNotes"
             android:icon="@drawable/ic_note" />
         <item
-            android:title="Remainder"
+            android:title="@string/remainder"
             android:id="@+id/navigateRemainder"
             android:icon="@drawable/ic_remainder" />
         <item
-            android:title="Archive"
+            android:title="@string/archive"
             android:id="@+id/navigateArchive"
             android:icon="@drawable/ic_archive" />
         <item
-            android:title="Delete"
+            android:title="@string/delete"
             android:id="@+id/navigateDelete"
             android:icon="@drawable/ic_delete" />
         <item
-            android:title="Help and Feedback"
+            android:title="@string/help_and_feedback"
             android:id="@+id/navigateHelp"
             android:icon="@drawable/ic_help_and_feedback" />
         <item
-            android:title="Logout"
+            android:title="@string/logout"
             android:id="@+id/navigateLogout"
             android:icon="@drawable/ic_logout" />
     </group>
