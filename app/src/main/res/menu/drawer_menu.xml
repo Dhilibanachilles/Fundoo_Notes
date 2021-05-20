@@ -17,10 +17,6 @@
             android:id="@+id/navigateArchive"
             android:icon="@drawable/ic_archive" />
         <item
-            android:title="@string/delete"
-            android:id="@+id/navigateDelete"
-            android:icon="@drawable/ic_delete" />
-        <item
             android:title="@string/help_and_feedback"
             android:id="@+id/navigateHelp"
             android:icon="@drawable/ic_help_and_feedback" />

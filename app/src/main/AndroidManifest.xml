@@ -22,7 +22,7 @@
         <activity
             android:name=".dashboard.HomeActivity"
             android:windowSoftInputMode="adjustResize"
-            android:screenOrientation="portrait"
+            android:screenOrientation="fullSensor"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity android:name=".authentication.RegisterActivity">
         </activity>

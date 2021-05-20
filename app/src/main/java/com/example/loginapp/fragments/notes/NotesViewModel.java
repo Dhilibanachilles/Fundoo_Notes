@@ -13,10 +13,9 @@ import com.example.loginapp.util.ViewState;
 import java.util.ArrayList;
 
 public class NotesViewModel extends ViewModel {
-    MutableLiveData<ViewState<ArrayList<FirebaseNoteModel>>> notesMutableLiveData =
-            new MutableLiveData<>();
+    MutableLiveData<ViewState<ArrayList<FirebaseNoteModel>>> notesMutableLiveData = new MutableLiveData<>();
     private static final String TAG = "NotesViewModel";
-    private FirebaseNoteManager firebaseNoteManager;
+    private final FirebaseNoteManager firebaseNoteManager;
 
     public NotesViewModel() {
         firebaseNoteManager = new FirebaseNoteManager();
@@ -30,17 +29,12 @@ public class NotesViewModel extends ViewModel {
             public void onSuccess(ArrayList<FirebaseNoteModel> data) {
                 Log.e(TAG, "onNoteReceived: " + data);
                 notesMutableLiveData.setValue(new ViewState.Success<>(data));
-
             }
 
             @Override
             public void onFailure(Exception exception) {
                 notesMutableLiveData.setValue(new ViewState.Failure<>(exception));
-
             }
         });
-
-
     }
-
 }
