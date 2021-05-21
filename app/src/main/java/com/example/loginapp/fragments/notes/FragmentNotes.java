@@ -1,10 +1,13 @@
 package com.example.loginapp.fragments.notes;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -14,15 +17,18 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.example.loginapp.R;
 import com.example.loginapp.adapters.Adapter;
 import com.example.loginapp.adapters.MyViewHolder;
+import com.example.loginapp.dashboard.HomeActivity;
 import com.example.loginapp.data_manager.FirebaseNoteManager;
 import com.example.loginapp.data_manager.model.FirebaseNoteModel;
 import com.example.loginapp.fragments.AddingNotesFragment;
+import com.example.loginapp.util.CallBack;
 import com.example.loginapp.util.ViewState;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -36,17 +42,18 @@ public class FragmentNotes extends Fragment {
     private static final String TAG = "FragmentNotes";
     private Adapter notesAdapter;
     private NotesViewModel notesViewModel;
+    private RecyclerView.LayoutManager layoutManager;
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater,
-                             @Nullable ViewGroup container,
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_notes, container, false);
         final StaggeredGridLayoutManager staggeredGridLayoutManager =
                 new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
         recyclerView = view.findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(staggeredGridLayoutManager);
+        layoutManager = decideLayoutManager(HomeActivity.IS_LINEAR_LAYOUT);
+        recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         firebaseNoteManager = new FirebaseNoteManager();
         notesViewModel = new ViewModelProvider(this).get(NotesViewModel.class);
@@ -63,7 +70,7 @@ public class FragmentNotes extends Fragment {
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                int position = viewHolder.getAdapterPosition();
+                int position = viewHolder.getBindingAdapterPosition();
                 try {
                     String noteId = notesAdapter.getItem(position).getId();
                     notesAdapter.removeNote(position);
@@ -76,6 +83,35 @@ public class FragmentNotes extends Fragment {
         }; 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
+        EditText inputSearch = view.findViewById(R.id.search_notes);
+        inputSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                notesAdapter.cancelTimer();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                firebaseNoteManager.getAllNotes(new CallBack<ArrayList<FirebaseNoteModel>>() {
+                    @Override
+                    public void onSuccess(ArrayList<FirebaseNoteModel> data) {
+                        Log.e(TAG, "onNoteReceived: " + data);
+                        if (data.size() != 0) {
+                            notesAdapter.searchNotes(s.toString());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Exception exception) {
+                    }
+
+                });
+            }
+        });
         return view;
     }
 
@@ -117,6 +153,19 @@ public class FragmentNotes extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setUpOnClickListeners();
+    }
+
+    public RecyclerView.LayoutManager decideLayoutManager(boolean isLinear) {
+        if (isLinear) {
+            layoutManager = new
+                    LinearLayoutManager(getContext(),
+                    LinearLayoutManager.VERTICAL,false);
+
+        } else {
+            layoutManager = new StaggeredGridLayoutManager(2,
+                                StaggeredGridLayoutManager.VERTICAL);
+        }
+        return layoutManager;
     }
 
     private void setUpOnClickListeners() {

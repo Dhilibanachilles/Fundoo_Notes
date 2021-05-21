@@ -36,6 +36,7 @@
     <string name="profile_pic">Profile</string>
     <string name="button_to_change_rofile_picture">TODO</string>
     <string name="titleForEditNote">Title</string>
+    <string name="search_notes">Search Notes</string>
 
     />
 </resources>

@@ -40,6 +40,7 @@ import static com.example.loginapp.R.id.navigateNotes;
 public class HomeActivity extends AppCompatActivity {
     FirebaseAuth firebaseAuthenticator;
     private DrawerLayout drawer;
+    public static boolean IS_LINEAR_LAYOUT;
     SharedPreferenceHelper sharedPreferenceHelper;
     private final FirebaseUserManager firebaseUserManager = new FirebaseUserManager();
     ProgressBar pictureProgressbar;
@@ -73,6 +74,21 @@ public class HomeActivity extends AppCompatActivity {
         ImageView userDisplayPic = headerView.findViewById(R.id.user_profile);
         FloatingActionButton changePicture = headerView.findViewById(R.id.change_pic_button);
         pictureProgressbar = headerView.findViewById(R.id.progressbar_of_profile_upload);
+        ImageView linearIcon = findViewById(R.id.linearIcon);
+        ImageView gridIcon = findViewById(R.id.gridIcon);
+
+        gridIcon.setOnClickListener(v -> {
+            gridIcon.setVisibility(View.INVISIBLE);
+            linearIcon.setVisibility(View.VISIBLE);
+            IS_LINEAR_LAYOUT = false;
+        });
+
+        linearIcon.setOnClickListener(v -> {
+            gridIcon.setVisibility(View.VISIBLE);
+            linearIcon.setVisibility(View.INVISIBLE);
+            IS_LINEAR_LAYOUT = true;
+        });
+
         firebaseUserManager.getUserDetails(new CallBack<FirebaseUserModel>() {
             @Override
             public void onSuccess(FirebaseUserModel data) {
@@ -114,7 +130,6 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void uploadImageToFirebase(Uri imageUri) {
-        // uplaod image to firebase storage
         firebaseAuthenticator = FirebaseAuth.getInstance();
         final StorageReference fileRef = storageReference.
                 child("users/"+ Objects.requireNonNull(firebaseAuthenticator

@@ -1,5 +1,7 @@
 package com.example.loginapp.adapters;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,20 +11,24 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.loginapp.R;
-import com.example.loginapp.data_manager.FirebaseNoteManager;
 import com.example.loginapp.data_manager.model.FirebaseNoteModel;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Adapter extends RecyclerView.Adapter<MyViewHolder> {
     private static final String TAG = "NoteAdapter";
-    FirebaseNoteManager noteManager;
-    private final ArrayList<FirebaseNoteModel> notesList;
+    private ArrayList<FirebaseNoteModel> notesList;
     private final MyViewHolder.OnNoteListener onNoteListener;
+    private final ArrayList<FirebaseNoteModel> noteSource;
+    private Timer timer;
 
-    public Adapter(ArrayList<FirebaseNoteModel> notesList, MyViewHolder.OnNoteListener onNoteListener) {
+    public Adapter(ArrayList<FirebaseNoteModel> notesList,
+                   MyViewHolder.OnNoteListener onNoteListener) {
         this.notesList = notesList;
         this.onNoteListener = onNoteListener;
+        noteSource = notesList;
     }
 
     @NonNull
@@ -55,5 +61,39 @@ public class Adapter extends RecyclerView.Adapter<MyViewHolder> {
     public void removeNote(int position) {
         notesList.remove(position);
         notifyItemRemoved(position);
+    }
+
+    public void searchNotes(final String searchKeyword) {
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (searchKeyword.trim().isEmpty()){
+                    notesList = noteSource;
+                } else {
+                    ArrayList<FirebaseNoteModel> temp = new ArrayList<>();
+                    for (FirebaseNoteModel note : noteSource) {
+                        if (note.getTitle().toLowerCase().contains(searchKeyword.toLowerCase())
+                                || note.getDescription().toLowerCase().
+                                contains(searchKeyword.toLowerCase())) {
+                            temp.add(note);
+                        }
+                    }
+                    notesList = temp;
+                }
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        notifyDataSetChanged();
+                    }
+                });
+            }
+        },       500);
+    }
+
+    public void cancelTimer() {
+        if (timer != null) {
+            timer.cancel();
+        }
     }
 }
