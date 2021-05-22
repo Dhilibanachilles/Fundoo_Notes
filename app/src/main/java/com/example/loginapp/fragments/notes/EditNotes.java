@@ -11,8 +11,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import com.example.loginapp.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -23,7 +21,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class EditNotes extends Fragment {
 
@@ -79,13 +76,8 @@ public class EditNotes extends Fragment {
                 viewEditProgressBar.setVisibility(View.VISIBLE);
                 documentReference.set(note).addOnSuccessListener(aVoid -> {
                     Toast.makeText(getContext(),"Note Updated",Toast.LENGTH_SHORT).show();
-                    Fragment fragment = new FragmentNotes();
-                    FragmentManager fragmentManager = Objects.requireNonNull(getActivity()).getSupportFragmentManager();
-                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    fragmentTransaction.replace(R.id.fragment_container, fragment);
                     assert getFragmentManager() != null;
                     getFragmentManager().popBackStackImmediate();
-                    fragmentTransaction.commit();
 
                 }).
                         addOnFailureListener(e -> Toast.makeText(getContext(),

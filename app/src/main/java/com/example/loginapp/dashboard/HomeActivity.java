@@ -26,7 +26,7 @@ import com.example.loginapp.data_manager.SharedPreferenceHelper;
 import com.example.loginapp.data_manager.model.FirebaseUserModel;
 import com.example.loginapp.fragments.FragmentArchive;
 import com.example.loginapp.fragments.FragmentRemainder;
-import com.example.loginapp.fragments.notes.FragmentNotes;
+import com.example.loginapp.fragments.notes.NotesFragment;
 import com.example.loginapp.util.CallBack;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -45,6 +45,7 @@ public class HomeActivity extends AppCompatActivity {
     private final FirebaseUserManager firebaseUserManager = new FirebaseUserManager();
     ProgressBar pictureProgressbar;
     StorageReference storageReference;
+    private NotesFragment notesFragment;
     private static final String TAG = "HomeActivity";
 
     @Override
@@ -56,6 +57,7 @@ public class HomeActivity extends AppCompatActivity {
         sharedPreferenceHelper = new SharedPreferenceHelper(this);
         drawer = findViewById(R.id.drawer_layout);
         storageReference = FirebaseStorage.getInstance().getReference();
+        notesFragment = new NotesFragment();
         firebaseAuthenticator = FirebaseAuth.getInstance();
         NavigationView navigationView = findViewById(R.id.design_navigation_view);
         navigationView.setNavigationItemSelectedListener(this::onNavigationItemSelected);
@@ -63,12 +65,12 @@ public class HomeActivity extends AppCompatActivity {
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-            new FragmentNotes()).commit();
+                    notesFragment).commit();
             navigationView.setCheckedItem(navigateNotes);
         }
-
         View headerView = navigationView.getHeaderView(0);
         TextView userEmail = headerView.findViewById(R.id.user_email);
         ImageView userDisplayPic = headerView.findViewById(R.id.user_profile);
@@ -78,15 +80,17 @@ public class HomeActivity extends AppCompatActivity {
         ImageView gridIcon = findViewById(R.id.gridIcon);
 
         gridIcon.setOnClickListener(v -> {
-            gridIcon.setVisibility(View.INVISIBLE);
+            gridIcon.setVisibility(View.GONE);
             linearIcon.setVisibility(View.VISIBLE);
             IS_LINEAR_LAYOUT = false;
+            notesFragment.setLayoutManager(false);
         });
 
         linearIcon.setOnClickListener(v -> {
             gridIcon.setVisibility(View.VISIBLE);
-            linearIcon.setVisibility(View.INVISIBLE);
+            linearIcon.setVisibility(View.GONE);
             IS_LINEAR_LAYOUT = true;
+            notesFragment.setLayoutManager(true);
         });
 
         firebaseUserManager.getUserDetails(new CallBack<FirebaseUserModel>() {
@@ -97,25 +101,22 @@ public class HomeActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "onSuccess: " );
             }
-
             @Override
             public void onFailure(Exception exception) {
                 Toast.makeText(HomeActivity.this,
                         "Something went Wrong", Toast.LENGTH_SHORT).show();
             }
         });
-
         changePicture.setOnClickListener(v -> {
             Intent openGalleryIntent = new Intent(Intent.ACTION_PICK,
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(openGalleryIntent,1000);
         });
         StorageReference profileRef = storageReference.child("users/"+
-        (Objects.requireNonNull(firebaseAuthenticator.getCurrentUser())).getUid()+"/profile.jpg");
+                (Objects.requireNonNull(firebaseAuthenticator.getCurrentUser())).getUid()+"/profile.jpg");
         profileRef.getDownloadUrl().addOnSuccessListener(uri -> Picasso.get().
                 load(uri).into(userDisplayPic));
     }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, @androidx.annotation.
             Nullable Intent data) {
@@ -137,35 +138,33 @@ public class HomeActivity extends AppCompatActivity {
         pictureProgressbar.setVisibility(View.VISIBLE);
         fileRef.putFile(imageUri).addOnSuccessListener(taskSnapshot -> fileRef.
                 getDownloadUrl().addOnSuccessListener(uri -> {
-                    ImageView userDisplayPic = findViewById(R.id.user_profile);
-                    Picasso.get().load(uri).into(userDisplayPic);
-                    pictureProgressbar.setVisibility(View.INVISIBLE);
+            ImageView userDisplayPic = findViewById(R.id.user_profile);
+            Picasso.get().load(uri).into(userDisplayPic);
+            pictureProgressbar.setVisibility(View.INVISIBLE);
             Toast.makeText(HomeActivity.this, "Picture Updated", Toast.LENGTH_SHORT).show();
-                })).addOnFailureListener(e -> Toast.makeText(getApplicationContext(),
+        })).addOnFailureListener(e -> Toast.makeText(getApplicationContext(),
                 "Failed.", Toast.LENGTH_SHORT).show());
     }
-
     @SuppressLint("NonConstantResourceId")
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         item.getItemId();
-            if(item.getItemId() == R.id.navigateNotes) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new FragmentNotes()).commit();
-            } else if(item.getItemId() == R.id.navigateRemainder) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new FragmentRemainder()).commit();
-            } else if(item.getItemId() == R.id.navigateArchive) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                        new FragmentArchive()).commit();
-            } else if(item.getItemId() == R.id.navigateLogout) {
-              logout();
-            } else if(item.getItemId() == R.id.navigateHelp) {
-                Toast.makeText(this, "Help", Toast.LENGTH_SHORT).show();
+        if(item.getItemId() == R.id.navigateNotes) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                    notesFragment).commit();
+        } else if(item.getItemId() == R.id.navigateRemainder) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                    new FragmentRemainder()).commit();
+        } else if(item.getItemId() == R.id.navigateArchive) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                    new FragmentArchive()).commit();
+        } else if(item.getItemId() == R.id.navigateLogout) {
+            logout();
+        } else if(item.getItemId() == R.id.navigateHelp) {
+            Toast.makeText(this, "Help", Toast.LENGTH_SHORT).show();
         }
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
     private void logout() {
         FirebaseAuth.getInstance().signOut();
         sharedPreferenceHelper.setLoggedIn(false);
@@ -174,7 +173,6 @@ public class HomeActivity extends AppCompatActivity {
         startActivity(intToMain);
         finish();
     }
-
     @Override
     public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START)) {

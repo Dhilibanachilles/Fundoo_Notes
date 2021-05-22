@@ -9,4 +9,3 @@ public interface NoteManager {
     void getAllNotes(CallBack<ArrayList<FirebaseNoteModel>> listener);
     void addNote(String title, String description, CallBack<String> addListener);
 }
-

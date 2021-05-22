@@ -35,8 +35,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class FragmentNotes extends Fragment {
-
+public class NotesFragment extends Fragment {
     RecyclerView recyclerView;
     FirebaseNoteManager firebaseNoteManager;
     private static final String TAG = "FragmentNotes";
@@ -49,38 +48,35 @@ public class FragmentNotes extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_notes, container, false);
-        final StaggeredGridLayoutManager staggeredGridLayoutManager =
-                new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
         recyclerView = view.findViewById(R.id.recyclerView);
-        layoutManager = decideLayoutManager(HomeActivity.IS_LINEAR_LAYOUT);
+        setLayoutManager(HomeActivity.IS_LINEAR_LAYOUT);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         firebaseNoteManager = new FirebaseNoteManager();
         notesViewModel = new ViewModelProvider(this).get(NotesViewModel.class);
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback =
                 new ItemTouchHelper.SimpleCallback(0,
-                ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+                        ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+                    @Override
+                    public boolean onMove(@NonNull RecyclerView recyclerView,
+                                          @NonNull RecyclerView.ViewHolder viewHolder,
+                                          @NonNull RecyclerView.ViewHolder target) {
+                        return false;
+                    }
 
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView,
-                                  @NonNull RecyclerView.ViewHolder viewHolder,
-                                  @NonNull RecyclerView.ViewHolder target) {
-                return false;
-            }
-
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                int position = viewHolder.getBindingAdapterPosition();
-                try {
-                    String noteId = notesAdapter.getItem(position).getId();
-                    notesAdapter.removeNote(position);
-                    firebaseNoteManager.deleteNote(noteId);
-                    Toast.makeText(getContext(), "Note Deleted", Toast.LENGTH_SHORT).show();
-                } catch(IndexOutOfBoundsException e) {
-                    e.printStackTrace();
-                }
-            }
-        }; 
+                    @Override
+                    public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                        int position = viewHolder.getBindingAdapterPosition();
+                        try {
+                            String noteId = notesAdapter.getItem(position).getId();
+                            notesAdapter.removeNote(position);
+                            firebaseNoteManager.deleteNote(noteId);
+                            Toast.makeText(getContext(), "Note Deleted", Toast.LENGTH_SHORT).show();
+                        } catch(IndexOutOfBoundsException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
         EditText inputSearch = view.findViewById(R.id.search_notes);
@@ -149,13 +145,12 @@ public class FragmentNotes extends Fragment {
             }
         });
     }
-
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setUpOnClickListeners();
     }
 
-    public RecyclerView.LayoutManager decideLayoutManager(boolean isLinear) {
+    public void setLayoutManager(boolean isLinear) {
         if (isLinear) {
             layoutManager = new
                     LinearLayoutManager(getContext(),
@@ -165,7 +160,7 @@ public class FragmentNotes extends Fragment {
             layoutManager = new StaggeredGridLayoutManager(2,
                                 StaggeredGridLayoutManager.VERTICAL);
         }
-        return layoutManager;
+        recyclerView.setLayoutManager(layoutManager);
     }
 
     private void setUpOnClickListeners() {

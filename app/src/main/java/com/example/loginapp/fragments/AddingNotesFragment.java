@@ -17,7 +17,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.loginapp.R;
 import com.example.loginapp.data_manager.FirebaseNoteManager;
-import com.example.loginapp.fragments.notes.FragmentNotes;
+import com.example.loginapp.fragments.notes.NotesFragment;
 import com.example.loginapp.util.CallBack;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -100,7 +100,7 @@ public class AddingNotesFragment extends Fragment {
                 documentReference.set(note).addOnSuccessListener(aVoid -> {
                     Toast.makeText(getContext(),
                             "Note Created and Saved Successfully", Toast.LENGTH_SHORT).show();
-                    Fragment fragment = new FragmentNotes();
+                    Fragment fragment = new NotesFragment();
                     FragmentManager fragmentManager = Objects.requireNonNull(getActivity()).getSupportFragmentManager();
                     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                     fragmentTransaction.replace(R.id.fragment_container, fragment);
