@@ -1,13 +1,10 @@
 package com.example.loginapp.fragments.notes;
 
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -23,12 +20,10 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.example.loginapp.R;
 import com.example.loginapp.adapters.Adapter;
-import com.example.loginapp.adapters.MyViewHolder;
 import com.example.loginapp.dashboard.HomeActivity;
 import com.example.loginapp.data_manager.FirebaseNoteManager;
 import com.example.loginapp.data_manager.model.FirebaseNoteModel;
 import com.example.loginapp.fragments.AddingNotesFragment;
-import com.example.loginapp.util.CallBack;
 import com.example.loginapp.util.ViewState;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -79,36 +74,11 @@ public class NotesFragment extends Fragment {
                 };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
-        EditText inputSearch = view.findViewById(R.id.search_notes);
-        inputSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                notesAdapter.cancelTimer();
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                firebaseNoteManager.getAllNotes(new CallBack<ArrayList<FirebaseNoteModel>>() {
-                    @Override
-                    public void onSuccess(ArrayList<FirebaseNoteModel> data) {
-                        Log.e(TAG, "onNoteReceived: " + data);
-                        if (data.size() != 0) {
-                            notesAdapter.searchNotes(s.toString());
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Exception exception) {
-                    }
-
-                });
-            }
-        });
         return view;
+    }
+
+    public void searchText(String newText) {
+        notesAdapter.getFilter().filter(newText);
     }
 
     @Override
@@ -121,22 +91,19 @@ public class NotesFragment extends Fragment {
                 ArrayList<FirebaseNoteModel> notes = ((ViewState.Success<ArrayList<FirebaseNoteModel>>)
                         arrayListViewState).getData();
                 Log.e(TAG, "onNoteReceived: " + notes);
-                notesAdapter = new Adapter(notes, new MyViewHolder.OnNoteListener() {
-                    @Override
-                    public void onNoteClick(int position, View viewHolder) {
-                        String title = notesAdapter.getItem(position).getTitle();
-                        String description = notesAdapter.getItem(position).getDescription();
-                        String docID = notesAdapter.getItem(position).getId();
-                        EditNotes notes = new EditNotes();
-                        Bundle bundle = new Bundle();
-                        bundle.putString("Title", title);
-                        bundle.putString("Description", description);
-                        bundle.putString("DocID", docID);
-                        notes.setArguments(bundle);
-                        assert getFragmentManager() != null;
-                        getFragmentManager().beginTransaction().
-                                add(R.id.fragment_container, notes).commit();
-                    }
+                notesAdapter = new Adapter(notes, (position, viewHolder) -> {
+                    String title = notesAdapter.getItem(position).getTitle();
+                    String description = notesAdapter.getItem(position).getDescription();
+                    String docID = notesAdapter.getItem(position).getId();
+                    EditNotesFragment notes1 = new EditNotesFragment();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("Title", title);
+                    bundle.putString("Description", description);
+                    bundle.putString("DocID", docID);
+                    notes1.setArguments(bundle);
+                    assert getFragmentManager() != null;
+                    getFragmentManager().beginTransaction().
+                            add(R.id.fragment_container, notes1).commit();
                 });
                 recyclerView.setAdapter(notesAdapter);
                 notesAdapter.notifyDataSetChanged();
@@ -155,7 +122,6 @@ public class NotesFragment extends Fragment {
             layoutManager = new
                     LinearLayoutManager(getContext(),
                     LinearLayoutManager.VERTICAL,false);
-
         } else {
             layoutManager = new StaggeredGridLayoutManager(2,
                                 StaggeredGridLayoutManager.VERTICAL);
@@ -172,8 +138,12 @@ public class NotesFragment extends Fragment {
                     getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, fragment);
-            fragmentTransaction.addToBackStack(null);
+            assert getFragmentManager() != null;
+            getFragmentManager().popBackStack();
             fragmentTransaction.commit();
         });
+    }
+    public void addNote(FirebaseNoteModel notes) {
+        notesAdapter.addNote(notes);
     }
 }
