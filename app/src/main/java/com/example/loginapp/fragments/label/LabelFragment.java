@@ -168,10 +168,11 @@ public class LabelFragment extends Fragment {
                         Toast.makeText(getContext(),
                                 "Created Label", Toast.LENGTH_SHORT).show();
                         mCreateLabel.setText(null);
-                        InputMethodManager imm = (InputMethodManager)getActivity()
+                        InputMethodManager imm = (InputMethodManager) Objects.requireNonNull(getActivity())
                                 .getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                     }
+
                     @Override
                     public void onFailure(Exception exception) {
                         Toast.makeText(getContext(),
@@ -194,6 +195,7 @@ public class LabelFragment extends Fragment {
                         FirebaseLabelModel firebaseLabelModel = new FirebaseLabelModel(label, data);
                         addLabelListener.onLabelAdded(firebaseLabelModel);
                     }
+
                     @Override
                     public void onFailure(Exception exception) {
                         Toast.makeText(getContext(),

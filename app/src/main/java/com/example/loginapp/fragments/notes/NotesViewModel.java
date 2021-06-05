@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.loginapp.data_manager.FirebaseNoteManager;
+import com.example.loginapp.data_manager.NoteManager;
 import com.example.loginapp.data_manager.model.FirebaseNoteModel;
 import com.example.loginapp.util.CallBack;
 import com.example.loginapp.util.ViewState;
@@ -13,9 +14,10 @@ import com.example.loginapp.util.ViewState;
 import java.util.ArrayList;
 
 public class NotesViewModel extends ViewModel {
-    MutableLiveData<ViewState<ArrayList<FirebaseNoteModel>>> notesMutableLiveData = new MutableLiveData<>();
+    MutableLiveData<ViewState<ArrayList<FirebaseNoteModel>>> notesMutableLiveData =
+            new MutableLiveData<>();
     private static final String TAG = "NotesViewModel";
-    private final FirebaseNoteManager firebaseNoteManager;
+    private final NoteManager firebaseNoteManager;
 
     public NotesViewModel() {
         firebaseNoteManager = new FirebaseNoteManager();

@@ -22,10 +22,17 @@
         <activity
             android:name=".dashboard.HomeActivity"
             android:windowSoftInputMode="adjustResize"
-            android:screenOrientation="fullSensor"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".authentication.RegisterActivity">
         </activity>
+        <service
+            android:name=".MyNotificationService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <receiver android:name="com.example.loginapp.AlertReceiver" />
     </application>
 
 </manifest>

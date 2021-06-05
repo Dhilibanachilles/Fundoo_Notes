@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class EditLabel extends Fragment {
+public class EditLabelFragment extends Fragment {
         private static final String TAG = "edit label";
         EditText editLabelTitle;
         FloatingActionButton saveEditedLabel;
@@ -49,7 +49,7 @@ public class EditLabel extends Fragment {
                 String docID = getArguments().getString("docID");
                 Log.e(TAG, "onCreate: " + label);
 
-                editLabelTitle = view.findViewById(R.id.editLabel);
+                editLabelTitle = view.findViewById(R.id.editLabelFragment);
                 saveEditedLabel =  view.findViewById(R.id.editLabelButton);
                 editLabelTitle.setText(label);
 

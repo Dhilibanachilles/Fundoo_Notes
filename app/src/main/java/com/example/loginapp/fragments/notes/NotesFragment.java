@@ -20,35 +20,79 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.example.loginapp.R;
 import com.example.loginapp.adapters.Adapter;
-import com.example.loginapp.dashboard.HomeActivity;
+import com.example.loginapp.adapters.PaginationListener;
 import com.example.loginapp.data_manager.FirebaseNoteManager;
 import com.example.loginapp.data_manager.model.FirebaseNoteModel;
 import com.example.loginapp.fragments.AddingNotesFragment;
-import com.example.loginapp.util.ViewState;
+import com.example.loginapp.util.CallBack;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.Objects;
+
+import static com.example.loginapp.adapters.PaginationListener.LIMIT;
 
 public class NotesFragment extends Fragment {
     RecyclerView recyclerView;
     FirebaseNoteManager firebaseNoteManager;
     private static final String TAG = "FragmentNotes";
     private Adapter notesAdapter;
-    private NotesViewModel notesViewModel;
+    private final ArrayList<FirebaseNoteModel> firebaseNoteModels = new ArrayList<>();
     private RecyclerView.LayoutManager layoutManager;
+    private boolean isLastPage = false;
+    private boolean isLoading = false;
+    int itemCount = 0;
+    private static int TOTAL_NOTES_COUNT = 0;
+    private static int CURRENT_NOTES_COUNT = 0;
+    FirebaseUser firebaseUser;
+    FirebaseFirestore firebaseFirestore;
+    public EditNotesFragment editNotes;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_notes, container, false);
+        final StaggeredGridLayoutManager layoutManager = new
+                StaggeredGridLayoutManager(1,
+                StaggeredGridLayoutManager.VERTICAL);
+
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView = view.findViewById(R.id.recyclerView);
-        setLayoutManager(HomeActivity.IS_LINEAR_LAYOUT);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
+        recyclerView.addOnScrollListener(new PaginationListener(layoutManager) {
+            @Override
+            protected void loadMoreItems() {
+                isLoading = true;
+                recyclerView.post(() -> notesAdapter.addLoading());
+
+                fetchNotes(notesAdapter.getItem(notesAdapter.
+                        getItemCount()-1).getCreationTime());
+            }
+
+            @Override
+            public boolean isLastPage() {
+                return isLastPage;
+            }
+
+            @Override
+            public boolean isLoading() {
+                return isLoading;
+            }
+        });
         firebaseNoteManager = new FirebaseNoteManager();
-        notesViewModel = new ViewModelProvider(this).get(NotesViewModel.class);
+
+        NotesViewModel notesViewModel = new ViewModelProvider(this).get(NotesViewModel.class);
+
+        fetchNotes(0);
+        deleteNote();
+
+
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback =
                 new ItemTouchHelper.SimpleCallback(0,
                         ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
@@ -77,56 +121,25 @@ public class NotesFragment extends Fragment {
         return view;
     }
 
-    public void searchText(String newText) {
-        notesAdapter.getFilter().filter(newText);
-    }
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        notesViewModel.notesMutableLiveData.observe(getViewLifecycleOwner(), arrayListViewState -> {
-            if (arrayListViewState instanceof ViewState.Loading) {
-                Toast.makeText(getContext(), "Loading", Toast.LENGTH_SHORT).show();
-            } else if (arrayListViewState instanceof ViewState.Success) {
-                ArrayList<FirebaseNoteModel> notes = ((ViewState.Success<ArrayList<FirebaseNoteModel>>)
-                        arrayListViewState).getData();
-                Log.e(TAG, "onNoteReceived: " + notes);
-                notesAdapter = new Adapter(notes, (position, viewHolder) -> {
-                    String title = notesAdapter.getItem(position).getTitle();
-                    String description = notesAdapter.getItem(position).getDescription();
-                    String docID = notesAdapter.getItem(position).getId();
-                    EditNotesFragment notes1 = new EditNotesFragment();
-                    Bundle bundle = new Bundle();
-                    bundle.putString("Title", title);
-                    bundle.putString("Description", description);
-                    bundle.putString("DocID", docID);
-                    notes1.setArguments(bundle);
-                    assert getFragmentManager() != null;
-                    getFragmentManager().beginTransaction().
-                            add(R.id.fragment_container, notes1).commit();
-                });
-                recyclerView.setAdapter(notesAdapter);
-                notesAdapter.notifyDataSetChanged();
-            } else {
-                Toast.makeText(getContext(), "Something went Wrong", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        setUpOnClickListeners();
-    }
+        ArrayList<FirebaseNoteModel> notes = new ArrayList<>();
+        notesAdapter = new Adapter(notes, (position, viewHolder) -> {
 
-    public void setLayoutManager(boolean isLinear) {
-        if (isLinear) {
-            layoutManager = new
-                    LinearLayoutManager(getContext(),
-                    LinearLayoutManager.VERTICAL,false);
-        } else {
-            layoutManager = new StaggeredGridLayoutManager(2,
-                                StaggeredGridLayoutManager.VERTICAL);
-        }
-        recyclerView.setLayoutManager(layoutManager);
+            String title = notesAdapter.getItem(position).getTitle();
+            String description = notesAdapter.getItem(position).getDescription();
+            String docID = notesAdapter.getItem(position).getId();
+
+            editNotes = new EditNotesFragment();
+            Bundle args1 = new Bundle();
+            args1.putString("Title", title);
+            args1.putString("Description", description);
+            args1.putString("docID", docID);
+            editNotes.setArguments(args1);
+            assert getFragmentManager() != null;
+            getFragmentManager().beginTransaction().add(R.id.fragment_container, editNotes).commit();
+        });
     }
 
     private void setUpOnClickListeners() {
@@ -143,6 +156,118 @@ public class NotesFragment extends Fragment {
             fragmentTransaction.commit();
         });
     }
+
+    public void searchText(String newText) {
+        notesAdapter.getFilter().filter(newText);
+    }
+
+    private void fetchNotes(long timestamp) {
+        fetchAllNotesSize(new CallBack<Integer>() {
+            @Override
+            public void onSuccess(Integer data) {
+                TOTAL_NOTES_COUNT = data;
+                Log.e(TAG, "onSuccess: total notes count " +  data );
+                ArrayList<FirebaseNoteModel> noteslist = new ArrayList<FirebaseNoteModel>();
+                firebaseUser= FirebaseAuth.getInstance().getCurrentUser();
+                firebaseFirestore= FirebaseFirestore.getInstance();
+                firebaseFirestore.collection("Users").document(firebaseUser.getUid())
+                        .collection("User Notes")
+                        .orderBy("Creation Date")
+                        .startAfter(timestamp)
+                        .limit(LIMIT)
+                        .get()
+                        .addOnSuccessListener(queryDocumentSnapshots -> {
+                            int i;
+                            for (i=0;i<queryDocumentSnapshots.size();i++) {
+                                DocumentSnapshot documentSnapshot = queryDocumentSnapshots.getDocuments().get(i);
+
+                                String title = documentSnapshot.getString("Title");
+                                String description = documentSnapshot.getString("Description");
+                                String docID = documentSnapshot.getId();
+                                long timestamp = documentSnapshot.getLong("Creation Date");
+
+                                FirebaseNoteModel note = new FirebaseNoteModel(title, description, docID);
+                                note.setCreationTime(timestamp);
+                                noteslist.add(note);
+                            }
+
+                            if (CURRENT_NOTES_COUNT != 0)
+                                notesAdapter.removeLoading();
+                            isLoading = false;
+                            CURRENT_NOTES_COUNT += queryDocumentSnapshots.size() ;
+                            notesAdapter.addItems(noteslist);
+
+                            if (CURRENT_NOTES_COUNT < TOTAL_NOTES_COUNT ) {
+                                Log.e(TAG, "onSuccess: Current & Total "+ CURRENT_NOTES_COUNT + " : " + TOTAL_NOTES_COUNT );
+                            } else {
+                                Log.e(TAG, "onSuccess: is last page true " + CURRENT_NOTES_COUNT + " : " + TOTAL_NOTES_COUNT );
+
+                                isLastPage = true;
+                            }
+                        });
+
+                recyclerView.setAdapter(notesAdapter);
+                notesAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onFailure(Exception exception) {
+            }
+        });
+    }
+
+    private void fetchAllNotesSize(CallBack<Integer> countCallBack){
+        firebaseUser= FirebaseAuth.getInstance().getCurrentUser();
+        firebaseFirestore= FirebaseFirestore.getInstance();
+        firebaseFirestore.collection("Users").document(firebaseUser.getUid())
+                .collection("User Notes")
+                .get().addOnSuccessListener(queryDocumentSnapshots -> countCallBack.
+                onSuccess(queryDocumentSnapshots.size())).
+                addOnFailureListener(countCallBack::onFailure);
+    }
+
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        setUpOnClickListeners();
+    }
+
+//    public void setLayoutManager(boolean isLinear) {
+//        if (isLinear) {
+//            layoutManager = new
+//                    LinearLayoutManager(getContext(),
+//                    LinearLayoutManager.VERTICAL,false);
+//        } else {
+//            layoutManager = new StaggeredGridLayoutManager(2,
+//                                StaggeredGridLayoutManager.VERTICAL);
+//        }
+//        recyclerView.setLayoutManager(layoutManager);
+//    }
+
+    private void deleteNote() {
+        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0,
+                ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getBindingAdapterPosition();
+                try {
+                    String noteId = notesAdapter.getItem(position).getId();
+                    notesAdapter.removeNote(position);
+                    firebaseNoteManager.deleteNote(noteId);
+                }catch(IndexOutOfBoundsException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
+    }
+
     public void addNote(FirebaseNoteModel notes) {
         notesAdapter.addNote(notes);
     }
