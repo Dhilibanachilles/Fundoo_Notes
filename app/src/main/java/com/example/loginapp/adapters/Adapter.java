@@ -13,7 +13,6 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.loginapp.BaseViewHolder;
 import com.example.loginapp.R;
 import com.example.loginapp.data_manager.model.FirebaseNoteModel;
 
