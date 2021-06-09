@@ -8,13 +8,14 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 public abstract class PaginationListener extends RecyclerView.OnScrollListener {
     private static final String TAG = "PaginationListener";
-    public static final int LIMIT = 8;
+    public static final int LIMIT = 10;
 
     @NonNull
     private final StaggeredGridLayoutManager layoutManager;
     public PaginationListener(@NonNull StaggeredGridLayoutManager layoutManager) {
         this.layoutManager = layoutManager;
     }
+
     @Override
     public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
         super.onScrolled(recyclerView, dx, dy);
@@ -23,8 +24,7 @@ public abstract class PaginationListener extends RecyclerView.OnScrollListener {
         int positionView = layoutManager.findFirstVisibleItemPositions(null)[0];
 
         if (!isLoading() && !isLastPage()) {
-            if ((visibleItemCount + positionView) >= totalItemCount
-                    && positionView >= 0
+            if ((visibleItemCount + positionView) >= totalItemCount && positionView >= 0
                     && totalItemCount >= LIMIT) {
                 loadMoreItems();
                 Log.e(TAG, "total & limit " + totalItemCount + " : " + LIMIT );

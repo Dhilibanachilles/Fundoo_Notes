@@ -1,4 +1,4 @@
-package com.example.loginapp;
+package com.example.loginapp.adapters;
 
 import android.view.View;
 

@@ -1,4 +1,4 @@
-package com.example.loginapp;
+package com.example.loginapp.alarm_manager;
 
 import android.util.Log;
 import android.widget.Toast;
@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import com.example.loginapp.R;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -31,11 +32,13 @@ public class MyNotificationService extends FirebaseMessagingService {
                     String token = task.getResult();
                     Toast.makeText(MyNotificationService.this, token, Toast.LENGTH_SHORT).show();
                 });
-        showNotification(Objects.requireNonNull(remoteMessage.getNotification()).getTitle(),remoteMessage.getNotification().getBody());
+        showNotification(Objects.requireNonNull(remoteMessage.getNotification()).
+                          getTitle(), remoteMessage.getNotification().getBody());
     }
 
     private void showNotification(String title, String message) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this,"MyNotifications")
+        NotificationCompat.Builder builder = new NotificationCompat.
+                Builder(this,"MyNotifications")
                 .setSmallIcon(R.drawable.fundoo1)
                 .setContentTitle(title)
                 .setContentText(message)

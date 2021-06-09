@@ -30,6 +30,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -72,7 +73,7 @@ public class NotesFragment extends Fragment {
                 recyclerView.post(() -> notesAdapter.addLoading());
 
                 fetchNotes(notesAdapter.getItem(notesAdapter.
-                        getItemCount()-1).getCreationTime());
+                        getItemCount() - 1).getCreationTime());
             }
 
             @Override
@@ -110,7 +111,6 @@ public class NotesFragment extends Fragment {
                             String noteId = notesAdapter.getItem(position).getId();
                             notesAdapter.removeNote(position);
                             firebaseNoteManager.deleteNote(noteId);
-                            Toast.makeText(getContext(), "Note Deleted", Toast.LENGTH_SHORT).show();
                         } catch(IndexOutOfBoundsException e) {
                             e.printStackTrace();
                         }
@@ -170,11 +170,15 @@ public class NotesFragment extends Fragment {
                 ArrayList<FirebaseNoteModel> noteslist = new ArrayList<FirebaseNoteModel>();
                 firebaseUser= FirebaseAuth.getInstance().getCurrentUser();
                 firebaseFirestore= FirebaseFirestore.getInstance();
-                firebaseFirestore.collection("Users").document(firebaseUser.getUid())
+
+                Query query = firebaseFirestore.collection("Users").document(firebaseUser.getUid())
                         .collection("User Notes")
-                        .orderBy("Creation Date")
-                        .startAfter(timestamp)
-                        .limit(LIMIT)
+                        .orderBy("Creation Date", Query.Direction.DESCENDING);
+                if(timestamp != 0){
+                    query = query.startAfter(timestamp);
+                }
+
+                query.limit(LIMIT)
                         .get()
                         .addOnSuccessListener(queryDocumentSnapshots -> {
                             int i;
@@ -191,9 +195,11 @@ public class NotesFragment extends Fragment {
                                 noteslist.add(note);
                             }
 
-                            if (CURRENT_NOTES_COUNT != 0)
+                            if (CURRENT_NOTES_COUNT != 0) {
                                 notesAdapter.removeLoading();
-                            isLoading = false;
+                                isLoading = false;
+                            }
+
                             CURRENT_NOTES_COUNT += queryDocumentSnapshots.size() ;
                             notesAdapter.addItems(noteslist);
 
@@ -259,6 +265,7 @@ public class NotesFragment extends Fragment {
                     String noteId = notesAdapter.getItem(position).getId();
                     notesAdapter.removeNote(position);
                     firebaseNoteManager.deleteNote(noteId);
+                    Toast.makeText(getContext(), "Note Deleted", Toast.LENGTH_SHORT).show();
                 }catch(IndexOutOfBoundsException e) {
                     e.printStackTrace();
                 }

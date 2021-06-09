@@ -98,9 +98,9 @@ public class HomeActivity extends AppCompatActivity implements AddLabelListener,
         ImageView userDisplayPic = headerView.findViewById(R.id.user_profile);
         FloatingActionButton changePicture = headerView.findViewById(R.id.change_pic_button);
         pictureProgressbar = headerView.findViewById(R.id.progressbar_of_profile_upload);
+        getNotificationFromFirebase();
 //        ImageView linearIcon = findViewById(R.id.linearIcon);
 //        ImageView gridIcon = findViewById(R.id.gridIcon);
-        getNotificationFromFirebase();
 
 //        gridIcon.setOnClickListener(v -> {
 //            gridIcon.setVisibility(View.GONE);
@@ -160,7 +160,6 @@ public class HomeActivity extends AppCompatActivity implements AddLabelListener,
         MenuItem searchItem = menu.findItem(R.id.search_action);
         SearchView searchView = (SearchView) searchItem.getActionView();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-
             @Override
             public boolean onQueryTextSubmit(String query) {
                 return false;

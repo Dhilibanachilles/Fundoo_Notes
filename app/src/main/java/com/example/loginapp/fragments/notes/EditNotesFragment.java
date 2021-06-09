@@ -24,10 +24,10 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.example.loginapp.AlertReceiver;
-import com.example.loginapp.DatePickerFragment;
+import com.example.loginapp.alarm_manager.AlertReceiver;
+import com.example.loginapp.alarm_manager.DatePickerFragment;
 import com.example.loginapp.R;
-import com.example.loginapp.TimePickerFragment;
+import com.example.loginapp.alarm_manager.TimePickerFragment;
 import com.example.loginapp.data_manager.SharedPreferenceHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;

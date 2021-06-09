@@ -154,7 +154,7 @@ public class AddingNotesFragment extends Fragment {
                 createNoteProgressBar.setVisibility(View.VISIBLE);
                 documentReference.set(note).addOnSuccessListener(aVoid -> {
                     Toast.makeText(getContext(),
-                            "Note Created and Saved Successfully", Toast.LENGTH_SHORT).show();
+                            "Note Created", Toast.LENGTH_SHORT).show();
                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW);
                         NotificationManager notificationManager = Objects.requireNonNull(getContext()).getSystemService(NotificationManager.class);

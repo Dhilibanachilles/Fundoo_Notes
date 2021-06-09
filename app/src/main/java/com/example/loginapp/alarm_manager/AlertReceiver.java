@@ -1,4 +1,4 @@
-package com.example.loginapp;
+package com.example.loginapp.alarm_manager;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

@@ -88,6 +88,7 @@ public class LabelFragment extends Fragment {
                     String labelId = labelAdapter.getItem(position).getLabelId();
                     labelAdapter.removeNote(position);
                     fireBaseNoteManager.deleteLabel(labelId);
+                    Toast.makeText(getContext(), "Label Deleted", Toast.LENGTH_SHORT).show();
                 }catch(IndexOutOfBoundsException e) {
                     e.printStackTrace();
                 }
@@ -166,7 +167,7 @@ public class LabelFragment extends Fragment {
                     @Override
                     public void onSuccess(String data) {
                         Toast.makeText(getContext(),
-                                "Created Label", Toast.LENGTH_SHORT).show();
+                                "Label Created", Toast.LENGTH_SHORT).show();
                         mCreateLabel.setText(null);
                         InputMethodManager imm = (InputMethodManager) Objects.requireNonNull(getActivity())
                                 .getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -187,7 +188,7 @@ public class LabelFragment extends Fragment {
                         Toast.makeText(getContext(),
                                 "Label Created", Toast.LENGTH_SHORT).show();
                         mCreateLabel.setText(null);
-                        InputMethodManager keyBoard = (InputMethodManager)getActivity()
+                        InputMethodManager keyBoard = (InputMethodManager) Objects.requireNonNull(getActivity())
                                 .getSystemService(Context.INPUT_METHOD_SERVICE);
                         keyBoard.hideSoftInputFromWindow(v.getWindowToken(), 0);
                         assert getFragmentManager() != null;
