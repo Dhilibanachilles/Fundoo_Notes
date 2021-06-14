@@ -15,24 +15,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/search_notes"
+        app:layout_constraintTop_toTopOf="parent"
         tools:listitem="@layout/view_note_layout" />
-
-    <EditText
-        android:id="@+id/search_notes"
-        android:layout_width="match_parent"
-        android:layout_height="45dp"
-        android:hint="@string/search_notes"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:gravity="center"
-        android:textStyle="bold"
-        android:background="#D9CADD"
-        app:layout_constraintBottom_toTopOf="@+id/recyclerView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
 

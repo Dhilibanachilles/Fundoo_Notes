@@ -21,9 +21,9 @@
             android:id="@+id/navigateLabel"
             android:icon="@drawable/ic_baseline_label_24"/>
         <item
-            android:title="@string/help_and_feedback"
-            android:id="@+id/navigateHelp"
-            android:icon="@drawable/ic_help_and_feedback" />
+            android:id="@+id/navigateTrash"
+            android:title="@string/trash"
+            android:icon="@drawable/ic_delete"/>
         <item
             android:title="@string/logout"
             android:id="@+id/navigateLogout"

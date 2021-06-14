@@ -21,7 +21,7 @@ public class NotesViewModel extends ViewModel {
 
     public NotesViewModel() {
         firebaseNoteManager = new FirebaseNoteManager();
-        loadNotes();
+//        loadNotes();
     }
 
     private void loadNotes() {

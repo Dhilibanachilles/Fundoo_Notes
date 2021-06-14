@@ -43,10 +43,12 @@ public class Adapter extends RecyclerView.Adapter<BaseViewHolder> implements Fil
         switch (viewType) {
             case VIEW_TYPE_NORMAL:
                 return new ViewHolder(
-                        LayoutInflater.from(parent.getContext()).inflate(R.layout.view_note_layout, parent, false), (OnNoteListener) onNoteListener);
+                        LayoutInflater.from(parent.getContext()).
+                                inflate(R.layout.view_note_layout, parent, false), onNoteListener);
             case VIEW_TYPE_LOADING:
                 return new ProgressHolder(
-                        LayoutInflater.from(parent.getContext()).inflate(R.layout.item_loading, parent, false));
+                        LayoutInflater.from(parent.getContext()).
+                                inflate(R.layout.item_loading, parent, false));
             default:
                 return null;
         }
@@ -72,20 +74,6 @@ public class Adapter extends RecyclerView.Adapter<BaseViewHolder> implements Fil
         return notesList.size();
     }
 
-    public FirebaseNoteModel getItem(int position) {
-        try{
-            return notesList.get(position);
-        }catch (ArrayIndexOutOfBoundsException e){
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public void removeNote(int position) {
-        notesList.remove(position);
-        notifyItemRemoved(position);
-    }
-
     public void addItems(ArrayList<FirebaseNoteModel> postItems) {
         notesList.addAll(postItems);
         notifyDataSetChanged();
@@ -102,10 +90,24 @@ public class Adapter extends RecyclerView.Adapter<BaseViewHolder> implements Fil
         int position = notesList.size() - 1;
 
         FirebaseNoteModel item = getItem(position);
-        if (item != null) {
+        if (getItem(position) != null) {
             notesList.remove(position);
             notifyItemRemoved(position);
         }
+    }
+
+    public FirebaseNoteModel getItem(int position) {
+        try{
+            return notesList.get(position);
+        }catch (ArrayIndexOutOfBoundsException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void removeNote(int position) {
+        notesList.remove(position);
+        notifyItemRemoved(position);
     }
 
     @Override
@@ -145,6 +147,11 @@ public class Adapter extends RecyclerView.Adapter<BaseViewHolder> implements Fil
         }
     };
 
+    public void addNote(FirebaseNoteModel note) {
+        notesList.add(0, note);
+        notifyItemInserted(0);
+    }
+
     public  class ViewHolder extends BaseViewHolder implements View.OnClickListener {
         @SuppressLint("NonConstantResourceId")
         @BindView(R.id.note_title)
@@ -175,7 +182,7 @@ public class Adapter extends RecyclerView.Adapter<BaseViewHolder> implements Fil
 
         @Override
         public void onClick(View v) {
-            onNoteListener.onNoteClick(getBindingAdapterPosition(),v);
+            onNoteListener.onNoteClick(getBindingAdapterPosition(), v);
         }
     }
 
@@ -188,10 +195,5 @@ public class Adapter extends RecyclerView.Adapter<BaseViewHolder> implements Fil
         @Override
         protected void clear() {
         }
-    }
-
-    public void addNote(FirebaseNoteModel note) {
-        notesList.add(0, note);
-        notifyItemInserted(0);
     }
 }

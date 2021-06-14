@@ -1,4 +1,4 @@
-package com.example.loginapp.fragments.notes;
+package com.example.loginapp.fragments;
 
 import android.graphics.Canvas;
 import android.os.Bundle;
@@ -12,8 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,10 +22,9 @@ import com.example.loginapp.adapters.Adapter;
 import com.example.loginapp.adapters.PaginationListener;
 import com.example.loginapp.data_manager.FirebaseNoteManager;
 import com.example.loginapp.data_manager.model.FirebaseNoteModel;
-import com.example.loginapp.fragments.AddingNotesFragment;
+import com.example.loginapp.fragments.notes.EditNotesFragment;
 import com.example.loginapp.util.CallBack;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -40,7 +37,7 @@ import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator
 
 import static com.example.loginapp.adapters.PaginationListener.LIMIT;
 
-public class NotesFragment extends Fragment {
+public class TrashFragment extends Fragment {
     RecyclerView recyclerView;
     FirebaseNoteManager firebaseNoteManager;
     private static final String TAG = "FragmentNotes";
@@ -60,12 +57,12 @@ public class NotesFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_notes, container, false);
+        View view = inflater.inflate(R.layout.fragment_trash, container, false);
         final StaggeredGridLayoutManager layoutManager = new
                 StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
 
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        recyclerView = view.findViewById(R.id.recyclerView);
+        recyclerView = view.findViewById(R.id.trashRecyclerView);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.addOnScrollListener(new PaginationListener(layoutManager) {
@@ -77,12 +74,10 @@ public class NotesFragment extends Fragment {
                 fetchNotes(notesAdapter.getItem(notesAdapter.
                         getItemCount() - 1).getCreationTime());
             }
-
             @Override
             public boolean isLastPage() {
                 return isLastPage;
             }
-
             @Override
             public boolean isLoading() {
                 return isLoading;
@@ -90,7 +85,6 @@ public class NotesFragment extends Fragment {
         });
         firebaseNoteManager = new FirebaseNoteManager();
         fetchNotes(0);
-
 
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback =
                 new ItemTouchHelper.SimpleCallback(0,
@@ -109,20 +103,9 @@ public class NotesFragment extends Fragment {
                             case ItemTouchHelper.LEFT:
                                 try {
                                     FirebaseNoteModel firebaseNoteModel = notesAdapter.getItem(position);
-                                    firebaseNoteModel.setDeleted(true);
-                                    firebaseNoteManager.updateNote(firebaseNoteModel, new CallBack<Boolean>() {
-                                        @Override
-                                        public void onSuccess(Boolean data) {
-                                            notesAdapter.removeNote(position);
-                                            Toast.makeText(getContext(), "Note Deleted", Toast.LENGTH_SHORT).show();
-                                        }
-
-                                        @Override
-                                        public void onFailure(Exception exception) {
-                                            Toast.makeText(getContext(), "Something went wrong while deleting", Toast.LENGTH_SHORT).show();
-
-                                        }
-                                    });
+                                    firebaseNoteManager.deleteNote(firebaseNoteModel.getId());
+                                    notesAdapter.removeNote(position);
+                                    Toast.makeText(getContext(), "Note Deleted Permanently", Toast.LENGTH_SHORT).show();
                                 } catch (IndexOutOfBoundsException e) {
                                     e.printStackTrace();
                                 }
@@ -131,17 +114,19 @@ public class NotesFragment extends Fragment {
                             case ItemTouchHelper.RIGHT:
                                 try {
                                     FirebaseNoteModel firebaseNoteModel = notesAdapter.getItem(position);
-                                    firebaseNoteModel.setArchived(true);
+                                    firebaseNoteModel.setDeleted(false);
                                     firebaseNoteManager.updateNote(firebaseNoteModel, new CallBack<Boolean>() {
                                         @Override
                                         public void onSuccess(Boolean data) {
                                             notesAdapter.removeNote(position);
-                                            Toast.makeText(getContext(), "Note Archived", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(getContext(), "Note Restored", Toast.LENGTH_SHORT).show();
                                         }
 
                                         @Override
                                         public void onFailure(Exception exception) {
-                                            Toast.makeText(getContext(), "Something went wrong while archiving", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(getContext(), "Something went wrong while archiving",
+                                                    Toast.LENGTH_SHORT).show();
+
                                         }
                                     });
                                 } catch (IndexOutOfBoundsException e) {
@@ -150,17 +135,16 @@ public class NotesFragment extends Fragment {
                                 break;
                         }
                     }
-
                     @Override
                     public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView,
                                             @NonNull RecyclerView.ViewHolder viewHolder,
                                             float dX, float dY, int actionState, boolean isCurrentlyActive) {
                         new RecyclerViewSwipeDecorator.Builder(getContext(), c,
                                 recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-                                .addSwipeLeftBackgroundColor(ContextCompat.getColor(getContext(), R.color.design_default_color_error))
+                                .addSwipeLeftBackgroundColor(ContextCompat.getColor(getContext(), R.color.black))
                                 .addSwipeLeftActionIcon(R.drawable.ic_delete)
-                                .addSwipeRightBackgroundColor(ContextCompat.getColor(getContext(), R.color.teal_700))
-                                .addSwipeRightActionIcon(R.drawable.ic_archive)
+                                .addSwipeRightBackgroundColor(ContextCompat.getColor(getContext(), R.color.design_default_color_error))
+                                .addSwipeRightActionIcon(R.drawable.ic_note)
                                 .setActionIconTint(ContextCompat.getColor(recyclerView.getContext(), android.R.color.white))
                                 .create()
                                 .decorate();
@@ -177,36 +161,7 @@ public class NotesFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         ArrayList<FirebaseNoteModel> notes = new ArrayList<>();
         notesAdapter = new Adapter(notes, (position, viewHolder) -> {
-
-            String title = notesAdapter.getItem(position).getTitle();
-            String description = notesAdapter.getItem(position).getDescription();
-            String docID = notesAdapter.getItem(position).getId();
-
-            editNotes = new EditNotesFragment();
-            Bundle args1 = new Bundle();
-            args1.putString("Title", title);
-            args1.putString("Description", description);
-            args1.putString("docID", docID);
-            editNotes.setArguments(args1);
-            getFragmentManager().beginTransaction().add(R.id.fragment_container, editNotes).commit();
         });
-    }
-
-    private void setUpOnClickListeners() {
-        FloatingActionButton onClickingAddNoteButton = requireView().findViewById(R.id.addNotesFloatingButton);
-        onClickingAddNoteButton.setOnClickListener(v -> {
-            Fragment fragment = new AddingNotesFragment();
-            FragmentManager fragmentManager = requireActivity().
-                    getSupportFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.fragment_container, fragment);
-            getChildFragmentManager().popBackStack();
-            fragmentTransaction.commit();
-        });
-    }
-
-    public void searchText(String newText) {
-        notesAdapter.getFilter().filter(newText);
     }
 
     private void fetchNotes(long timestamp) {
@@ -227,8 +182,7 @@ public class NotesFragment extends Fragment {
                 }
 
                 query.limit(LIMIT)
-                        .whereEqualTo("archived", false)
-                        .whereEqualTo("deleted", false)
+                        .whereEqualTo("deleted", true)
                         .get()
                         .addOnSuccessListener(queryDocumentSnapshots -> {
                             int i;
@@ -253,7 +207,6 @@ public class NotesFragment extends Fragment {
                             } else {
                                 Log.e(TAG, "onSuccess: is last page true " +
                                         CURRENT_NOTES_COUNT + " : " + TOTAL_NOTES_COUNT);
-
                                 isLastPage = true;
                             }
                         }).addOnFailureListener(new OnFailureListener() {
@@ -281,26 +234,5 @@ public class NotesFragment extends Fragment {
                 .get().addOnSuccessListener(queryDocumentSnapshots -> countCallBack.
                 onSuccess(queryDocumentSnapshots.size())).
                 addOnFailureListener(countCallBack::onFailure);
-    }
-
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        setUpOnClickListeners();
-    }
-
-    public void setLayoutManager(boolean isLinear) {
-        if (isLinear) {
-            layoutManager = new
-                    LinearLayoutManager(getContext(),
-                    LinearLayoutManager.VERTICAL, false);
-        } else {
-            layoutManager = new StaggeredGridLayoutManager(2,
-                    StaggeredGridLayoutManager.VERTICAL);
-        }
-        recyclerView.setLayoutManager(layoutManager);
-    }
-
-    public void addNote(FirebaseNoteModel notes) {
-        notesAdapter.addNote(notes);
     }
 }

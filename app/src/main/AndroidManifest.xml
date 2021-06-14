@@ -27,13 +27,13 @@
         <activity android:name=".authentication.RegisterActivity">
         </activity>
         <service
-            android:name=".alarm_manager.MyNotificationService"
+            android:name=".work_manager.MyNotificationService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <receiver android:name="com.example.loginapp.alarm_manager.AlertReceiver" />
+        <receiver android:name="com.example.loginapp.work_manager.AlertReceiver" />
     </application>
 
 </manifest>

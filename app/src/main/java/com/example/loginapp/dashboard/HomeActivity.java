@@ -37,6 +37,7 @@ import com.example.loginapp.data_manager.model.FirebaseNoteModel;
 import com.example.loginapp.data_manager.model.FirebaseUserModel;
 import com.example.loginapp.fragments.FragmentArchive;
 import com.example.loginapp.fragments.FragmentRemainder;
+import com.example.loginapp.fragments.TrashFragment;
 import com.example.loginapp.fragments.label.AddLabelListener;
 import com.example.loginapp.fragments.label.LabelFragment;
 import com.example.loginapp.fragments.notes.AddNoteListener;
@@ -66,6 +67,8 @@ public class HomeActivity extends AppCompatActivity implements AddLabelListener,
     StorageReference storageReference;
     private NotesFragment notesFragment;
     private LabelFragment labelFragment;
+    private TrashFragment trashFragment;
+    private FragmentArchive fragmentArchive;
     private EditNotesFragment editNotes;
     private static final String TAG = "HomeActivity";
 
@@ -80,6 +83,8 @@ public class HomeActivity extends AppCompatActivity implements AddLabelListener,
         storageReference = FirebaseStorage.getInstance().getReference();
         notesFragment = new NotesFragment();
         labelFragment = new LabelFragment();
+        trashFragment = new TrashFragment();
+        fragmentArchive = new FragmentArchive();
         firebaseAuthenticator = FirebaseAuth.getInstance();
         NavigationView navigationView = findViewById(R.id.design_navigation_view);
         navigationView.setNavigationItemSelectedListener(this::onNavigationItemSelected);
@@ -99,22 +104,22 @@ public class HomeActivity extends AppCompatActivity implements AddLabelListener,
         FloatingActionButton changePicture = headerView.findViewById(R.id.change_pic_button);
         pictureProgressbar = headerView.findViewById(R.id.progressbar_of_profile_upload);
         getNotificationFromFirebase();
-//        ImageView linearIcon = findViewById(R.id.linearIcon);
-//        ImageView gridIcon = findViewById(R.id.gridIcon);
+        ImageView linearIcon = findViewById(R.id.linearIcon);
+        ImageView gridIcon = findViewById(R.id.gridIcon);
 
-//        gridIcon.setOnClickListener(v -> {
-//            gridIcon.setVisibility(View.GONE);
-//            linearIcon.setVisibility(View.VISIBLE);
-//            IS_LINEAR_LAYOUT = false;
-//            notesFragment.setLayoutManager(false);
-//        });
-//
-//        linearIcon.setOnClickListener(v -> {
-//            gridIcon.setVisibility(View.VISIBLE);
-//            linearIcon.setVisibility(View.GONE);
-//            IS_LINEAR_LAYOUT = true;
-//            notesFragment.setLayoutManager(true);
-//        });
+        gridIcon.setOnClickListener(v -> {
+            gridIcon.setVisibility(View.GONE);
+            linearIcon.setVisibility(View.VISIBLE);
+            IS_LINEAR_LAYOUT = false;
+            notesFragment.setLayoutManager(false);
+        });
+
+        linearIcon.setOnClickListener(v -> {
+            gridIcon.setVisibility(View.VISIBLE);
+            linearIcon.setVisibility(View.GONE);
+            IS_LINEAR_LAYOUT = true;
+            notesFragment.setLayoutManager(true);
+        });
 
         firebaseUserManager.getUserDetails(new CallBack<FirebaseUserModel>() {
             @Override
@@ -206,8 +211,9 @@ public class HomeActivity extends AppCompatActivity implements AddLabelListener,
                     labelFragment).commit();
         } else if(item.getItemId() == R.id.navigateLogout) {
             logout();
-        } else if(item.getItemId() == R.id.navigateHelp) {
-            Toast.makeText(this, "Help", Toast.LENGTH_SHORT).show();
+        } else if(item.getItemId() == R.id.navigateTrash) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                    trashFragment).commit();
         }
         drawer.closeDrawer(GravityCompat.START);
         return true;

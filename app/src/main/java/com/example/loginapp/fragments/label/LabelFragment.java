@@ -101,6 +101,7 @@ public class LabelFragment extends Fragment {
         ImageView backButton = view.findViewById(R.id.backButton);
         mCreateLabel = view .findViewById(R.id.createLabel);
         mSaveLabel.setOnClickListener(this::onClick);
+
         backButton.setOnClickListener(v -> {
             Fragment fragment = new NotesFragment();
             FragmentManager fragmentManager = Objects.requireNonNull(getActivity()).
@@ -153,8 +154,6 @@ public class LabelFragment extends Fragment {
 
     private void onClick(View v) {
         String label = mCreateLabel.getText().toString();
-        String user = firebaseUser.getUid();
-        String email = firebaseUser.getEmail();
         if (label.isEmpty()) {
             Toast.makeText(getContext(), "Both fields are Required", Toast.LENGTH_SHORT).show();
         } else {
@@ -191,8 +190,13 @@ public class LabelFragment extends Fragment {
                         InputMethodManager keyBoard = (InputMethodManager) Objects.requireNonNull(getActivity())
                                 .getSystemService(Context.INPUT_METHOD_SERVICE);
                         keyBoard.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                        assert getFragmentManager() != null;
-                        getFragmentManager().popBackStackImmediate();
+                        Fragment fragment = new LabelFragment();
+                        FragmentManager fragmentManager = Objects.requireNonNull(getActivity()).
+                                getSupportFragmentManager();
+                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                        fragmentTransaction.replace(R.id.fragment_container, fragment);
+                        fragmentTransaction.addToBackStack(null);
+                        fragmentTransaction.commit();
                         FirebaseLabelModel firebaseLabelModel = new FirebaseLabelModel(label, data);
                         addLabelListener.onLabelAdded(firebaseLabelModel);
                     }
@@ -207,6 +211,10 @@ public class LabelFragment extends Fragment {
         }
     }
 
+    public void addLabel(FirebaseLabelModel label) {
+        labelAdapter.addLabel(label);
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -219,9 +227,5 @@ public class LabelFragment extends Fragment {
         super.onStop();
         Objects.requireNonNull(((AppCompatActivity) Objects.
                 requireNonNull(getActivity())).getSupportActionBar()).show();
-    }
-
-    public void addLabel(FirebaseLabelModel label) {
-        labelAdapter.addLabel(label);
     }
 }

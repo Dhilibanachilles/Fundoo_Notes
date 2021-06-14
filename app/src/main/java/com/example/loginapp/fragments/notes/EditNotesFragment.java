@@ -23,12 +23,14 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.work.OneTimeWorkRequest;
 
-import com.example.loginapp.alarm_manager.AlertReceiver;
-import com.example.loginapp.alarm_manager.DatePickerFragment;
 import com.example.loginapp.R;
-import com.example.loginapp.alarm_manager.TimePickerFragment;
 import com.example.loginapp.data_manager.SharedPreferenceHelper;
+import com.example.loginapp.work_manager.AlertReceiver;
+import com.example.loginapp.work_manager.DatePickerFragment;
+import com.example.loginapp.work_manager.MyWorker;
+import com.example.loginapp.work_manager.TimePickerFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -128,6 +130,8 @@ public class EditNotesFragment extends Fragment {
 
                 documentReference.set(note).addOnSuccessListener(aVoid -> {
                     Toast.makeText(getContext(),"Note updated",Toast.LENGTH_SHORT).show();
+                    final OneTimeWorkRequest.Builder workRequest =
+                            new OneTimeWorkRequest.Builder(MyWorker.class);
                     sharedPreferences.setNoteTitle(newNoteTitle);
                     sharedPreferences.setNoteDescription(newNoteDescription);
                     startAlarm(schedule);
